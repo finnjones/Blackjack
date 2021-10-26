@@ -1,6 +1,8 @@
 import pygame
 from pygame.locals import *
 import os
+import random
+from cards import *
 pygame.init()
 
 black = (0, 0, 0)
@@ -17,7 +19,7 @@ screenSize = (1620 , 1000)
 window = pygame.display.set_mode(screenSize)
 
 
-cardBack = pygame.image.load(FlexyPath + "/Cards/Back/red.png")
+cardBack = pygame.transform.scale(pygame.image.load(FlexyPath + "/Cards/Back/red.png"), (150, 213))
 
 class cards(object):
     def __init__(self, x, y):
@@ -33,7 +35,7 @@ class cards(object):
         if self.vel > 0:
             self.vel -= self.friction
             self.rVel -= self.rFriction
-            self.x += self.vel
+            self.y += self.vel
             self.rot += self.rVel
 
     def draw(self):
@@ -45,29 +47,35 @@ class cards(object):
         # window.blit(pygame.transform.rotate(cardBack, self.rot), (self.x, self.y))
 
 
-
 def redraw():
     window.fill(white)
     cards.draw()
     pygame.display.flip()
 
+def shuffle(self):
+    l = list(cardDict.items())
+    random.shuffle(l)
+    d = dict(l)
+    print(d)
 
-
-cards = cards(500, 500)
 
 running = True
-
+spin = False
 while running:
     redraw()
     clock.tick(60)
     fps = str(int(clock. get_fps()))
     pygame.display.set_caption(fps)
-
+    
     for event in pygame.event.get():
+        keys = pygame.key.get_pressed()
         if event.type == pygame.QUIT:
             running = False
-    
-    cards.slideCards()
+        
+        if keys[pygame.K_SPACE]:
+            spin = True
+    if spin == True:
+        cards.slideCards()
     
 
 pygame.quit()
