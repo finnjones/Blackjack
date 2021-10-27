@@ -27,7 +27,7 @@ class cards(object):
     def __init__(self, x, y, pos):
         self.x = x
         self.y = y
-        self.vel = 10
+        self.vel = 9
         self.rVel = 4
         self.friction = 0.05
         self.rFriction = 0.01
@@ -35,19 +35,34 @@ class cards(object):
         self.rot = 0
         self.cardBack = pygame.transform.scale(pygame.image.load(FlexyPath + "/Cards/Front/" + list(cardShuffle.d)[cardSelector] + ".png").convert_alpha(), (150, 213))
         cardsL.append(self)
+        
     def slideCards(self):
+        self.Playerpos = (self.x, self.y)
+        print(self.Playerpos[1] - self.pos[1])
+        if abs(self.Playerpos[0] - self.pos[0]) > self.vel and abs(self.Playerpos[1] - self.pos[1]) > self.vel:
+            self.ang = ((vec(self.pos) - self.Playerpos).angle_to(vec(1, 0))*-1)
 
-
-        self.rot = (vec(self.x, self.y) - vec(self.pos)).angle_to(vec(1, 0)) + 90
-        print(self.rot)
-        if self.x < self.pos[0]:
-            self.x += self.vel
-        elif self.x > self.pos[0]:
-            self.x -= self.vel
-        if self.y < self.pos[1]:
-            self.y += self.vel
-        elif self.y > self.pos[1]:
-            self.y -= self.vel
+            move_vec = pygame.math.Vector2()
+            # self.vel -= 0.05
+            
+            move_vec.from_polar((self.vel, self.ang))
+            self.x += move_vec[0]
+            self.y += move_vec[1]
+            # self.rVel -= 0.05
+            self.rot += self.rVel
+            print(move_vec)
+        # self.x = self.x + (self.rVel*math.cos(math.radians(self.rot)))
+        # self.y = self.y + (self.rVel*math.sin(math.radians(self.rot)))
+        # self.rot = (vec(self.x, self.y) - vec(self.pos)).angle_to(vec(1, 0)) + 90
+        # print(self.rot)
+        # if self.x < self.pos[0]:
+        #     self.x += self.vel
+        # elif self.x > self.pos[0]:
+        #     self.x -= self.vel
+        # if self.y < self.pos[1]:
+        #     self.y += self.vel
+        # elif self.y > self.pos[1]:
+        #     self.y -= self.vel
             # self.vel -= self.friction
             # self.rVel -= self.rFriction
             # self.y += self.vel
@@ -79,7 +94,7 @@ running = True
 spin = False
 cardShuffle = cardShuffle()
 cardShuffle.shuffle()
-cards(screenSize[0]/2, 0, (900,900))
+# cards(screenSize[0]/2, 0, (1300,900))
 
 
 while running:
@@ -97,7 +112,7 @@ while running:
             spin = True
             cardSelector += 1
 
-            cards(screenSize[0]/2, 0, (900,900))
+            cards(screenSize[0]/2, 0, (1300,900))
     if spin == True:
         for i in cardsL:
             i.slideCards()
