@@ -9,7 +9,7 @@ pygame.init()
 
 black = (0, 0, 0)
 white = (255, 255, 255)
-green = (0, 128, 0)
+green = (25, 115, 78)
 brown = (139,69,19)
 red = (255, 0, 0)
 grey = (128,128,128)
@@ -21,19 +21,25 @@ screenSize = (1620 , 1000)
 
 window = pygame.display.set_mode(screenSize)
 cardsL = []
+playerHand = []
+CPU1Hand = []
+CPU2Hand = []
+dealer = []
 
-cardSelector = -1
+
+cardSelector = 0
+print(cardDict)
 class cards(object):
     def __init__(self, x, y, pos):
         self.x = x
         self.y = y
-        self.vel = 20
-        self.rVel = 6
-        self.friction = 0.18
-        self.rFriction = 0.009
+        self.vel = 55
+        self.rVel = 20
+        self.friction = 1.5
+        self.rFriction = 0.5
         self.pos = pos
         self.rot = 0
-        self.cardBack = pygame.transform.scale(pygame.image.load(FlexyPath + "/Cards/Front/" + list(cardShuffle.d)[cardSelector] + ".png").convert_alpha(), (150, 213))
+        self.cardBack = pygame.transform.scale(pygame.image.load(FlexyPath + "/Cards/Front/" + list(cardShuffle.sCards)[cardSelector] + ".png").convert_alpha(), (150, 213))
         cardsL.append(self)
         
     def slideCards(self):
@@ -70,52 +76,89 @@ class cardShuffle():
     def shuffle(self):
         self.l = list(cardDict.items())
         random.shuffle(self.l)
-        self.d = dict(self.l)
+        self.sCards = dict(self.l)
 
 class drawText(object):
-    def __init__(self, text, colour, size, loc):
-        self.text = text
+    def __init__(self, colour, size, loc):
         self.size = size
         self.colour = colour
         self.loc = loc
         self.font = pygame.font.Font(FlexyPath + '/font/quicksand.ttf', self.size)
-        self.textF = self.font.render(self.text, True, self.colour)
-        self.textRect = self.textF.get_rect()
-        self.loc = (self.loc[0] - self.font.size(self.text)[0]/2, self.loc[1])
+        self.loc = (self.loc[0] - self.font.size("12")[0]/2, self.loc[1])
+
         
 
-    def draw(self):
+    def draw(self, text):
+        self.text = text
+
+        self.textF = self.font.render(self.text, True, self.colour)
+        self.textRect = self.textF.get_rect()
         window.blit(self.textF, self.loc)
 def deals():
     global cardSelector
-    cardSelector += 1
+    global CPU1Hand
+    global playerHand
+    global CPU2Hand
     cards(screenSize[0]/2, 0, (screenSize[0]/2 - 20, 760))
+    playerHand.append(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
     cardSelector += 1
     cards(screenSize[0]/2, 0, (screenSize[0]/2 + 20, 780))
+    playerHand.append(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
     cardSelector += 1
     cards(screenSize[0]/2, 0, (screenSize[0]/4 - 20, 760))
+    CPU1Hand.append(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
     cardSelector += 1
     cards(screenSize[0]/2, 0, (screenSize[0]/4 + 20, 780))
+    CPU1Hand.append(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
     cardSelector += 1
     cards(screenSize[0]/2, 0, (screenSize[0] * 0.75 - 20, 760))
+    CPU2Hand.append(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
     cardSelector += 1
     cards(screenSize[0]/2, 0, (screenSize[0] * 0.75 + 20, 780))
+    CPU2Hand.append(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
+    cardSelector += 1
+    cards(screenSize[0]/2, 0, (screenSize[0] * 0.75 + 20, 780))
+    cardSelector += 1
+    cards(screenSize[0]/2, 0, (screenSize[0]/2 - 20, 385))
+    cardSelector += 1
+    cards(screenSize[0]/2, 0, (screenSize[0]/2 + 20, 400))
 
 def redraw():
-    window.fill(white)
-    for i in cardsL:
+    window.fill(green)
+    for i in reversed(cardsL):
         i.draw()
-    playerHand.draw()
+    
+    print(playerHand)
+    if 11 in playerHand and sum(playerHand) > 21:
+        playerHand.remove(11)
+        playerHand.append(1)
+    if 11 in CPU1Hand and sum(CPU1Hand) > 21:
+        CPU1Hand.remove(11)
+        CPU1Hand.append(1)
+    if 11 in CPU2Hand and sum(CPU2Hand) > 21:
+        CPU2Hand.remove(11)
+        CPU2Hand.append(1)
+    if deal == True:
+        playerHandT.draw(str(sum(playerHand)))
+        CPU1T.draw(str(sum(CPU1Hand)))
+        CPU2T.draw(str(sum(CPU2Hand)))
     pygame.display.flip()
 
 
 
 
 running = True
-spin = False
+deal = False
 cardShuffle = cardShuffle()
 cardShuffle.shuffle()
-playerHand = drawText("hello", black, 30, (screenSize[0]/2, 900))
+cardSelector = 0
+print(cardShuffle.sCards)
+print(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
+print(str(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]]))
+playerHandT = drawText( black, 30, (screenSize[0]/2, 900))
+CPU1T = drawText( black, 30, (screenSize[0]/4, 900))
+CPU2T = drawText( black, 30, (screenSize[0]*0.75, 900))
+
 
 
 deals()
@@ -135,9 +178,9 @@ while running:
         
         
         if keys[pygame.K_SPACE]:
-            spin = True
+            deal = True
 
-    if spin == True:
+    if deal == True:
         for i in cardsL:
             i.slideCards()
     
