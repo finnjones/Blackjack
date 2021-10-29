@@ -24,7 +24,7 @@ cardsL = []
 playerHand = []
 CPU1Hand = []
 CPU2Hand = []
-dealer = []
+dealerHand = []
 
 
 cardSelector = 0
@@ -96,9 +96,7 @@ class drawText(object):
         window.blit(self.textF, self.loc)
 def deals():
     global cardSelector
-    global CPU1Hand
-    global playerHand
-    global CPU2Hand
+
     cards(screenSize[0]/2, 0, (screenSize[0]/2 - 20, 760))
     playerHand.append(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
     cardSelector += 1
@@ -117,11 +115,11 @@ def deals():
     cards(screenSize[0]/2, 0, (screenSize[0] * 0.75 + 20, 780))
     CPU2Hand.append(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
     cardSelector += 1
-    cards(screenSize[0]/2, 0, (screenSize[0] * 0.75 + 20, 780))
+    cards(screenSize[0]/2, 0, (screenSize[0]/2 - 20, 340))
+    dealerHand.append(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
     cardSelector += 1
-    cards(screenSize[0]/2, 0, (screenSize[0]/2 - 20, 385))
-    cardSelector += 1
-    cards(screenSize[0]/2, 0, (screenSize[0]/2 + 20, 400))
+    cards(screenSize[0]/2, 0, (screenSize[0]/2 + 20, 380))
+    dealerHand.append(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
 
 def redraw():
     window.fill(green)
@@ -142,6 +140,8 @@ def redraw():
         playerHandT.draw(str(sum(playerHand)))
         CPU1T.draw(str(sum(CPU1Hand)))
         CPU2T.draw(str(sum(CPU2Hand)))
+        dealerT.draw(str(sum(dealerHand)))
+
     pygame.display.flip()
 
 
@@ -158,6 +158,7 @@ print(str(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]]))
 playerHandT = drawText( black, 30, (screenSize[0]/2, 900))
 CPU1T = drawText( black, 30, (screenSize[0]/4, 900))
 CPU2T = drawText( black, 30, (screenSize[0]*0.75, 900))
+dealerT = drawText( black, 30, (screenSize[0]/2, 500))
 
 
 
