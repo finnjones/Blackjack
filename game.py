@@ -97,28 +97,28 @@ class drawText(object):
 def deals():
     global cardSelector
 
-    cards(screenSize[0]/2, 0, (screenSize[0]/2 - 20, 760))
+    cards(screenSize[0]/2, 0, (screenSize[0]/2 + 20, 760))
     playerHand.append(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
     cardSelector += 1
-    cards(screenSize[0]/2, 0, (screenSize[0]/2 + 20, 780))
+    cards(screenSize[0]/2, 0, (screenSize[0]/2 - 20, 780))
     playerHand.append(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
     cardSelector += 1
-    cards(screenSize[0]/2, 0, (screenSize[0]/4 - 20, 760))
+    cards(screenSize[0]/2, 0, (screenSize[0]/4 + 20, 760))
     CPU1Hand.append(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
     cardSelector += 1
-    cards(screenSize[0]/2, 0, (screenSize[0]/4 + 20, 780))
+    cards(screenSize[0]/2, 0, (screenSize[0]/4 - 20, 780))
     CPU1Hand.append(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
     cardSelector += 1
-    cards(screenSize[0]/2, 0, (screenSize[0] * 0.75 - 20, 760))
+    cards(screenSize[0]/2, 0, (screenSize[0] * 0.75 + 20, 760))
     CPU2Hand.append(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
     cardSelector += 1
-    cards(screenSize[0]/2, 0, (screenSize[0] * 0.75 + 20, 780))
+    cards(screenSize[0]/2, 0, (screenSize[0] * 0.75 - 20, 780))
     CPU2Hand.append(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
     cardSelector += 1
-    cards(screenSize[0]/2, 0, (screenSize[0]/2 - 20, 340))
+    cards(screenSize[0]/2, 0, (screenSize[0]/2 + 20, 340))
     dealerHand.append(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
     cardSelector += 1
-    cards(screenSize[0]/2, 0, (screenSize[0]/2 + 20, 380))
+    cards(screenSize[0]/2, 0, (screenSize[0]/2 - 20, 380))
     dealerHand.append(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
 
 def redraw():
