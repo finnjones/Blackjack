@@ -40,7 +40,11 @@ class cards(object):
         self.pos = pos
         self.rot = 0
         self.cardBack = pygame.transform.scale(pygame.image.load(FlexyPath + "/Cards/Front/" + list(cardShuffle.sCards)[cardSelector] + ".png").convert_alpha(), (150, 213))
+        self.Playerpos = (self.x, self.y)
+
+        self.ang = ((vec(self.pos) - self.Playerpos).angle_to(vec(1, 0))*-1)
         cardsL.append(self)
+        
         
     def slideCards(self):
         self.Playerpos = (self.x, self.y)
@@ -50,10 +54,7 @@ class cards(object):
         if abs(self.Playerpos[0] - self.pos[0]) > self.vel or abs(self.Playerpos[1] - self.pos[1]) > self.vel:
             self.vel -= self.friction
             self.rVel -= self.rFriction
-            self.ang = ((vec(self.pos) - self.Playerpos).angle_to(vec(1, 0))*-1)
-
             move_vec = pygame.math.Vector2()
-            
             move_vec.from_polar((self.vel, self.ang))
             
             self.x += move_vec[0]
@@ -62,7 +63,8 @@ class cards(object):
             self.rot += self.rVel
 
         else:
-            
+            self.x = self.pos[0]
+            self.y = self.pos[1]
             if self.rot != 0:
                 self.rot += self.rVel
 
@@ -71,9 +73,19 @@ class cards(object):
         img = pygame.transform.rotate(self.cardBack, self.rot)
         window.blit(img, (self.x - int(img.get_width() / 2), self.y - int(img.get_height() / 2)))
 
+# class hit(object):
+#     def __init__(self):
+#         self.who = playerHand
+#         self.offsets = 20 * self.who.count()
+
+#     def hits(self):
+#         cards(screenSize[0]/2, 0, (screenSize[0]/2 + self.offsets, 760 - self.offsets))
+
+        
+
 
 class cardShuffle():
-    def shuffle(self):
+    def shuffle(self): 
         self.l = list(cardDict.items())
         random.shuffle(self.l)
         self.sCards = dict(self.l)
@@ -94,6 +106,15 @@ class drawText(object):
         self.textF = self.font.render(self.text, True, self.colour)
         self.textRect = self.textF.get_rect()
         window.blit(self.textF, self.loc)
+
+def hit():
+    global cardSelector
+    offsets = 20 * len(playerHand)
+    print(offsets)
+    cards(screenSize[0]/2, 0, (screenSize[0]/2 + offsets, 760 - offsets))
+    playerHand.append(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
+    cardSelector += 1
+
 def deals():
     global cardSelector
 
@@ -123,10 +144,9 @@ def deals():
 
 def redraw():
     window.fill(green)
-    for i in reversed(cardsL):
+    for i in cardsL:
         i.draw()
     
-    print(playerHand)
     if 11 in playerHand and sum(playerHand) > 21:
         playerHand.remove(11)
         playerHand.append(1)
@@ -152,9 +172,9 @@ deal = False
 cardShuffle = cardShuffle()
 cardShuffle.shuffle()
 cardSelector = 0
-print(cardShuffle.sCards)
-print(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
-print(str(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]]))
+# print(cardShuffle.sCards)
+# print(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
+# print(str(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]]))
 playerHandT = drawText( black, 30, (screenSize[0]/2, 900))
 CPU1T = drawText( black, 30, (screenSize[0]/4, 900))
 CPU2T = drawText( black, 30, (screenSize[0]*0.75, 900))
@@ -164,7 +184,7 @@ dealerT = drawText( black, 30, (screenSize[0]/2, 500))
 
 deals()
 
-
+hitP = False
 while running:
     
     redraw()
@@ -180,10 +200,23 @@ while running:
         
         if keys[pygame.K_SPACE]:
             deal = True
+        
+        if keys[pygame.K_h]:
+            hitP = True
+
+
+
 
     if deal == True:
         for i in cardsL:
             i.slideCards()
-    
+    if hitP == True:
+        hit()
+        hitP = False
+
+    #     for i in cardsL:
+    #         i.slideCards()
+    # print(cardsL)
+    # print(playerHand)
 
 pygame.quit()
