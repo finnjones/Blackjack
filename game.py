@@ -69,18 +69,10 @@ class cards(object):
                 self.rot += self.rVel
 
 
+
     def draw(self):
         img = pygame.transform.rotate(self.cardBack, self.rot)
         window.blit(img, (self.x - int(img.get_width() / 2), self.y - int(img.get_height() / 2)))
-
-# class hit(object):
-#     def __init__(self):
-#         self.who = playerHand
-#         self.offsets = 20 * self.who.count()
-
-#     def hits(self):
-#         cards(screenSize[0]/2, 0, (screenSize[0]/2 + self.offsets, 760 - self.offsets))
-
         
 
 
@@ -107,40 +99,48 @@ class drawText(object):
         self.textRect = self.textF.get_rect()
         window.blit(self.textF, self.loc)
 
-def hit():
+class dealC(object):
     global cardSelector
-    offsets = 20 * len(playerHand)
-    print(offsets)
-    cards(screenSize[0]/2, 0, (screenSize[0]/2 + offsets, 760 - offsets))
-    playerHand.append(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
-    cardSelector += 1
+    def __init__(self):
+        self.hands = [[playerHand, 0.5], [CPU1Hand, 0.25], [CPU2Hand, 0.75]]
+        self.locY = 780
 
-def deals():
-    global cardSelector
+    def dealF(self):
+        global cardSelector
 
-    cards(screenSize[0]/2, 0, (screenSize[0]/2 + 20, 760))
-    playerHand.append(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
-    cardSelector += 1
-    cards(screenSize[0]/2, 0, (screenSize[0]/2 - 20, 780))
-    playerHand.append(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
-    cardSelector += 1
-    cards(screenSize[0]/2, 0, (screenSize[0]/4 + 20, 760))
-    CPU1Hand.append(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
-    cardSelector += 1
-    cards(screenSize[0]/2, 0, (screenSize[0]/4 - 20, 780))
-    CPU1Hand.append(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
-    cardSelector += 1
-    cards(screenSize[0]/2, 0, (screenSize[0] * 0.75 + 20, 760))
-    CPU2Hand.append(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
-    cardSelector += 1
-    cards(screenSize[0]/2, 0, (screenSize[0] * 0.75 - 20, 780))
-    CPU2Hand.append(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
-    cardSelector += 1
-    cards(screenSize[0]/2, 0, (screenSize[0]/2 + 20, 340))
-    dealerHand.append(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
-    cardSelector += 1
-    cards(screenSize[0]/2, 0, (screenSize[0]/2 - 20, 380))
-    dealerHand.append(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
+        
+
+        for i in self.hands:
+            cards(screenSize[0]/2, 0, (screenSize[0]*i[1], self.locY))
+            i[0].append(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
+            cardSelector += 1
+            cards(screenSize[0]/2, 0, (screenSize[0]*i[1] + 40, self.locY - 40))
+            i[0].append(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
+            cardSelector += 1
+
+        cards(screenSize[0]/2, 0, (screenSize[0]*0.5, 380))
+        dealerHand.append(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
+        cardSelector += 1
+        cards(screenSize[0]/2, 0, (screenSize[0]*0.5 + 40, 380 - 40))
+        dealerHand.append(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
+        cardSelector += 1
+
+    def hit(self, hand):
+        global cardSelector
+        ajustment = 0.5
+        offsets = 40 * (len(hand))
+        
+        for i in self.hands:
+            if i[0] == hand:
+                ajustment = i[1]
+
+        cards(screenSize[0]/2, 0, (screenSize[0] * ajustment + offsets, 780 - offsets))
+        hand.append(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
+        cardSelector += 1
+
+
+
+
 
 def redraw():
     window.fill(green)
@@ -172,9 +172,6 @@ deal = False
 cardShuffle = cardShuffle()
 cardShuffle.shuffle()
 cardSelector = 0
-# print(cardShuffle.sCards)
-# print(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
-# print(str(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]]))
 playerHandT = drawText( black, 30, (screenSize[0]/2, 900))
 CPU1T = drawText( black, 30, (screenSize[0]/4, 900))
 CPU2T = drawText( black, 30, (screenSize[0]*0.75, 900))
@@ -182,8 +179,9 @@ dealerT = drawText( black, 30, (screenSize[0]/2, 500))
 
 
 
-deals()
+dealC = dealC()
 
+dealC.dealF()
 hitP = False
 while running:
     
@@ -211,12 +209,7 @@ while running:
         for i in cardsL:
             i.slideCards()
     if hitP == True:
-        hit()
+        dealC.hit(playerHand)
         hitP = False
-
-    #     for i in cardsL:
-    #         i.slideCards()
-    # print(cardsL)
-    # print(playerHand)
 
 pygame.quit()

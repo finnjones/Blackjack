@@ -1,1 +1,1 @@
-cardDict
+print(playerHand)
