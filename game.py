@@ -3,8 +3,11 @@ from pygame.locals import *
 import os
 import random
 import math
+import logging
+import threading
 from cards import *
-from deal import *
+from time import sleep
+# from CPU import *
 pygame.init()
 
 black = (0, 0, 0)
@@ -26,10 +29,10 @@ CPU1Hand = []
 CPU2Hand = []
 dealerHand = []
 
-
 cardSelector = 0
 print(cardDict)
 class cards(object):
+    global hitCPU
     def __init__(self, x, y, pos):
         self.x = x
         self.y = y
@@ -39,7 +42,11 @@ class cards(object):
         self.rFriction = 0.5
         self.pos = pos
         self.rot = 0
-        self.cardBack = pygame.transform.scale(pygame.image.load(FlexyPath + "/Cards/Front/" + list(cardShuffle.sCards)[cardSelector] + ".png").convert_alpha(), (150, 213))
+        if cardSelector == 6:
+            self.cardBack = pygame.transform.scale(pygame.image.load(FlexyPath + "/Cards/Back/Blue.png").convert_alpha(), (150, 213))
+        else:
+            self.cardBack = pygame.transform.scale(pygame.image.load(FlexyPath + "/Cards/Front/" + list(cardShuffle.sCards)[cardSelector] + ".png").convert_alpha(), (150, 213))
+        
         self.Playerpos = (self.x, self.y)
 
         self.ang = ((vec(self.pos) - self.Playerpos).angle_to(vec(1, 0))*-1)
@@ -47,6 +54,7 @@ class cards(object):
         
         
     def slideCards(self):
+        global hitCPU
         self.Playerpos = (self.x, self.y)
         if self.rot >= 360:
             self.rot = 0
@@ -66,7 +74,8 @@ class cards(object):
             self.x = self.pos[0]
             self.y = self.pos[1]
             if self.rot != 0:
-                self.rot += self.rVel
+                self.rot += self.rVel                
+                
 
 
 
@@ -123,6 +132,7 @@ class dealC(object):
         cardSelector += 1
         cards(screenSize[0]/2, 0, (screenSize[0]*0.5 + 40, 380 - 40))
         dealerHand.append(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
+        
         cardSelector += 1
 
     def hit(self, hand):
@@ -139,7 +149,15 @@ class dealC(object):
         cardSelector += 1
 
 
+class CPUP(object):
+    def __init__(self):
+        self.CPUS = [CPU1Hand, CPU2Hand]
+        
+    def play(self):
+        for i in self.CPUS:
 
+            if sum(i) < 17:
+                dealC.hit(i)
 
 
 def redraw():
@@ -165,7 +183,18 @@ def redraw():
     pygame.display.flip()
 
 
+def test():
+    global hitCPU
+    
+    while True:
+        if deal == True:
+            sleep(1)
+            hitCPU = True
+            print(hitCPU)
+            
 
+t1 = threading.Thread(target=test) 
+t1.daemon = True
 
 running = True
 deal = False
@@ -177,14 +206,18 @@ CPU1T = drawText( black, 30, (screenSize[0]/4, 900))
 CPU2T = drawText( black, 30, (screenSize[0]*0.75, 900))
 dealerT = drawText( black, 30, (screenSize[0]/2, 500))
 
-
+t1.start()
 
 dealC = dealC()
 
 dealC.dealF()
+
+CPUP = CPUP()
+
+hitCPU = False
 hitP = False
+
 while running:
-    
     redraw()
     clock.tick(60)
     fps = str(int(clock. get_fps()))
@@ -203,13 +236,17 @@ while running:
             hitP = True
 
 
-
-
     if deal == True:
         for i in cardsL:
             i.slideCards()
+    
     if hitP == True:
         dealC.hit(playerHand)
+        
         hitP = False
+
+    if hitCPU == True:
+        CPUP.play()
+        hitCPU = False
 
 pygame.quit()

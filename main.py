@@ -1,5 +1,7 @@
+from CPU import *
 from game import *
 from cards import *
+
 # from placeholder import *
 
 
