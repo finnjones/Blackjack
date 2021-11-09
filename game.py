@@ -1,4 +1,3 @@
-# from typing import Counter
 import pygame
 from pygame.locals import *
 import os
@@ -30,6 +29,7 @@ CPU1Hand = []
 CPU2Hand = []
 dealerHand = []
 hitText = []
+standText = []
 cardSelector = 0
 
 class cards(object):
@@ -114,7 +114,10 @@ class drawText(object):
             self.y -= 1
 
             if self.counter * 0.91 < 1:
-                hitText.remove(self)
+                if self.text == "hit":
+                    hitText.remove(self)
+                elif self.text == "stand":
+                    standText.remove(self)
 
         self.textRect = self.textF.get_rect()
         self.loc = (self.x, self.y)
@@ -125,6 +128,9 @@ class dealC(object):
     def __init__(self):
         self.hands = [[playerHand, 0.5], [CPU1Hand, 0.25], [CPU2Hand, 0.75]]
         self.locY = 780
+        
+        self.CPUS = [CPU1Hand, CPU2Hand]
+        self.selPlayer = 0
 
     def dealF(self):
         global cardSelector
@@ -161,6 +167,7 @@ class dealC(object):
         hand.append(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
         hitText.append(drawText(black, 30, (int(screenSize[0] * ajustment), 540), True))
         cardSelector += 1
+    
 
 
 class CPUP(object):
@@ -169,18 +176,25 @@ class CPUP(object):
         self.selPlayer = 0
         
     def play(self):
-        
 
         if sum(self.CPUS[self.selPlayer]) < 17:
             
             dealC.hit(self.CPUS[self.selPlayer])
         else:
+            if CPU1Hand == self.CPUS[self.selPlayer]:
+                standText.append(drawText(black, 30, (int(screenSize[0]* 0.25), 540), True))
+                print(CPU1Hand)
+            if CPU2Hand == self.CPUS[self.selPlayer]:
+                standText.append(drawText(black, 30, (int(screenSize[0]* 0.75), 540), True))
+
             if self.selPlayer + 1 < len(self.CPUS):
                 self.selPlayer += 1
 
 
 def redraw():
     window.fill(green)
+    for i in standText:
+        i.draw("stand")
     for i in hitText:
         i.draw("hit")
     for i in cardsL:
@@ -200,6 +214,7 @@ def redraw():
         CPU1T.draw(str(sum(CPU1Hand)))
         CPU2T.draw(str(sum(CPU2Hand)))
         dealerT.draw(str(sum(dealerHand)))
+    
 
     
     pygame.display.flip()
@@ -238,7 +253,7 @@ CPUP = CPUP()
 
 hitCPU = False
 hitP = False
-
+standP = False
 while running:
     redraw()
     clock.tick(60)
@@ -256,12 +271,19 @@ while running:
         
         if keys[pygame.K_h]:
             hitP = True
+        if keys[pygame.K_s]:
+            standP = True
 
 
     if deal == True:
         for i in cardsL:
             i.slideCards()
     
+    if standP == True:
+        standText.append(drawText(black, 30, (int(screenSize[0]), 540), True))
+        standP = False
+
+
     if hitP == True:
         dealC.hit(playerHand)
         
