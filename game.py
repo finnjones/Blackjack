@@ -1,3 +1,4 @@
+# from typing import Counter
 import pygame
 from pygame.locals import *
 import os
@@ -28,9 +29,9 @@ playerHand = []
 CPU1Hand = []
 CPU2Hand = []
 dealerHand = []
-
+hitText = []
 cardSelector = 0
-print(cardDict)
+
 class cards(object):
     global hitCPU
     def __init__(self, x, y, pos):
@@ -92,22 +93,33 @@ class cardShuffle():
         self.sCards = dict(self.l)
 
 class drawText(object):
-    def __init__(self, colour, size, loc):
+    def __init__(self, colour, size, loc, fade):
+        self.fade = fade
         self.size = size
         self.colour = colour
         self.loc = loc
         self.font = pygame.font.Font(FlexyPath + '/font/quicksand.ttf', self.size)
-        self.loc = (self.loc[0] - self.font.size("12")[0]/2, self.loc[1])
-
+        self.counter = 290
         
 
     def draw(self, text):
+        self.x = self.loc[0]
+        self.y = self.loc[1]
         self.text = text
 
         self.textF = self.font.render(self.text, True, self.colour)
-        self.textRect = self.textF.get_rect()
-        window.blit(self.textF, self.loc)
+        if self.fade == True:
+            self.counter = self.counter * 0.85
+            self.textF.set_alpha(self.counter)
+            self.y -= 1
 
+            if self.counter * 0.91 < 1:
+                hitText.remove(self)
+
+        self.textRect = self.textF.get_rect()
+        self.loc = (self.x, self.y)
+        window.blit(self.textF, self.loc)
+        
 class dealC(object):
     global cardSelector
     def __init__(self):
@@ -127,10 +139,10 @@ class dealC(object):
             i[0].append(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
             cardSelector += 1
 
-        cards(screenSize[0]/2, 0, (screenSize[0]*0.5, 380))
+        cards(screenSize[0]/2, 0, (screenSize[0]*0.5, 340))
         dealerHand.append(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
         cardSelector += 1
-        cards(screenSize[0]/2, 0, (screenSize[0]*0.5 + 40, 380 - 40))
+        cards(screenSize[0]/2, 0, (screenSize[0]*0.5 + 40, 340 - 40))
         dealerHand.append(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
         
         cardSelector += 1
@@ -143,25 +155,34 @@ class dealC(object):
         for i in self.hands:
             if i[0] == hand:
                 ajustment = i[1]
+        
 
         cards(screenSize[0]/2, 0, (screenSize[0] * ajustment + offsets, 780 - offsets))
         hand.append(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
+        hitText.append(drawText(black, 30, (int(screenSize[0] * ajustment), 540), True))
         cardSelector += 1
 
 
 class CPUP(object):
     def __init__(self):
         self.CPUS = [CPU1Hand, CPU2Hand]
+        self.selPlayer = 0
         
     def play(self):
-        for i in self.CPUS:
+        
 
-            if sum(i) < 17:
-                dealC.hit(i)
+        if sum(self.CPUS[self.selPlayer]) < 17:
+            
+            dealC.hit(self.CPUS[self.selPlayer])
+        else:
+            if self.selPlayer + 1 < len(self.CPUS):
+                self.selPlayer += 1
 
 
 def redraw():
     window.fill(green)
+    for i in hitText:
+        i.draw("hit")
     for i in cardsL:
         i.draw()
     
@@ -180,20 +201,21 @@ def redraw():
         CPU2T.draw(str(sum(CPU2Hand)))
         dealerT.draw(str(sum(dealerHand)))
 
+    
     pygame.display.flip()
 
 
-def test():
+def delayHit():
     global hitCPU
     
     while True:
         if deal == True:
             sleep(1)
             hitCPU = True
-            print(hitCPU)
+
             
 
-t1 = threading.Thread(target=test) 
+t1 = threading.Thread(target=delayHit) 
 t1.daemon = True
 
 running = True
@@ -201,10 +223,10 @@ deal = False
 cardShuffle = cardShuffle()
 cardShuffle.shuffle()
 cardSelector = 0
-playerHandT = drawText( black, 30, (screenSize[0]/2, 900))
-CPU1T = drawText( black, 30, (screenSize[0]/4, 900))
-CPU2T = drawText( black, 30, (screenSize[0]*0.75, 900))
-dealerT = drawText( black, 30, (screenSize[0]/2, 500))
+playerHandT = drawText( black, 30, (screenSize[0]/2, 900), False)
+CPU1T = drawText( black, 30, (screenSize[0]/4, 900), False)
+CPU2T = drawText( black, 30, (screenSize[0]*0.75, 900), False)
+dealerT = drawText( black, 30, (screenSize[0]/2, 460), False)
 
 t1.start()
 
