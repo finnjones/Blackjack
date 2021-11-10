@@ -30,6 +30,7 @@ CPU2Hand = []
 dealerHand = []
 hitText = []
 standText = []
+allstand = []
 cardSelector = 0
 
 class cards(object):
@@ -113,11 +114,11 @@ class drawText(object):
             self.textF.set_alpha(self.counter)
             self.y -= 1
 
-            if self.counter * 0.91 < 1:
-                if self.text == "hit":
-                    hitText.remove(self)
-                elif self.text == "stand":
-                    standText.remove(self)
+            # if self.counter * 0.91 < 1:
+            #     if self.text == "hit":
+            #         hitText.remove(self)
+            #     elif self.text == "stand":
+            #         standText.remove(self)
 
         self.textRect = self.textF.get_rect()
         self.loc = (self.x, self.y)
@@ -181,14 +182,30 @@ class CPUP(object):
             
             dealC.hit(self.CPUS[self.selPlayer])
         else:
-            if CPU1Hand == self.CPUS[self.selPlayer]:
-                standText.append(drawText(black, 30, (int(screenSize[0]* 0.25), 540), True))
-                print(CPU1Hand)
-            if CPU2Hand == self.CPUS[self.selPlayer]:
-                standText.append(drawText(black, 30, (int(screenSize[0]* 0.75), 540), True))
+            if len(standText) <= 1:
+                if CPU1Hand == self.CPUS[self.selPlayer]:
+                    standText.append(drawText(black, 30, (int(screenSize[0]* 0.25), 540), True))
+                    allstand.append("1")
+                if CPU2Hand == self.CPUS[self.selPlayer]:
+                    standText.append(drawText(black, 30, (int(screenSize[0]* 0.75), 540), True))
+                    allstand.append("2")
 
             if self.selPlayer + 1 < len(self.CPUS):
                 self.selPlayer += 1
+
+
+class dealerP(object):
+    def play():
+        if sum(dealerHand) < 17:
+            dealC.hit(dealerHand)
+
+        else:
+            # if len(standText) <= 1:
+                # if dealerHand == self.CPUS[self.selPlayer]:
+            standText.append(drawText(black, 30, (int(screenSize[0]/2), 540), True))
+                    # allstand.append("1")
+
+
 
 
 def redraw():
@@ -271,6 +288,7 @@ while running:
         
         if keys[pygame.K_h]:
             hitP = True
+
         if keys[pygame.K_s]:
             standP = True
 
@@ -280,9 +298,14 @@ while running:
             i.slideCards()
     
     if standP == True:
-        standText.append(drawText(black, 30, (int(screenSize[0]), 540), True))
+        allstand.append("p")
+        standText.append(drawText(black, 30, (int(screenSize[0]/2 - 20), 540), True))
         standP = False
 
+    print(allstand)
+    if "p" in allstand and "1" in allstand and "2" in allstand:
+        print("dealer")
+        dealerP.play()
 
     if hitP == True:
         dealC.hit(playerHand)
@@ -291,6 +314,10 @@ while running:
 
     if hitCPU == True:
         CPUP.play()
+        if "p" in allstand and "1" in allstand and "2" in allstand:
+            dealerP.play()
+        else:
+            CPUP.play()
         hitCPU = False
 
 pygame.quit()
