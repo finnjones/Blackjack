@@ -45,9 +45,10 @@ class cards(object):
         self.pos = pos
         self.rot = 0
         if cardSelector == 6:
-            self.cardBack = pygame.transform.scale(pygame.image.load(FlexyPath + "/Cards/Back/Blue.png").convert_alpha(), (150, 213))
+            self.card = pygame.transform.scale(pygame.image.load(FlexyPath + "/Cards/Back/Blue.png").convert_alpha(), (150, 213))
         else:
-            self.cardBack = pygame.transform.scale(pygame.image.load(FlexyPath + "/Cards/Front/" + list(cardShuffle.sCards)[cardSelector] + ".png").convert_alpha(), (150, 213))
+            self.card = pygame.transform.scale(pygame.image.load(FlexyPath + "/Cards/Front/" + list(cardShuffle.sCards)[cardSelector] + ".png").convert_alpha(), (150, 213))
+
         
         self.Playerpos = (self.x, self.y)
 
@@ -82,7 +83,11 @@ class cards(object):
 
 
     def draw(self):
-        img = pygame.transform.rotate(self.cardBack, self.rot)
+        
+        img = pygame.transform.rotate(self.card, self.rot)
+        # if "p" in allstand and "1" in allstand and "2" in allstand: 
+        #     window.blit(self.dealHide, (self.x - int(img.get_width() / 2), self.y - int(img.get_height() / 2)))
+        # else:
         window.blit(img, (self.x - int(img.get_width() / 2), self.y - int(img.get_height() / 2)))
         
 
@@ -164,9 +169,15 @@ class dealC(object):
                 ajustment = i[1]
         
 
-        cards(screenSize[0]/2, 0, (screenSize[0] * ajustment + offsets, 780 - offsets))
+        
         hand.append(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
-        hitText.append(drawText(black, 30, (int(screenSize[0] * ajustment), 540), True))
+
+        if hand == dealerHand:
+            cards(screenSize[0]/2, 0, (screenSize[0] * ajustment + offsets, 340 - offsets))
+            hitText.append(drawText(black, 30, (int(screenSize[0] * ajustment), 100), True))
+        else:
+            cards(screenSize[0]/2, 0, (screenSize[0] * ajustment + offsets, 780 - offsets))
+            hitText.append(drawText(black, 30, (int(screenSize[0] * ajustment), 540), True))
         cardSelector += 1
     
 
@@ -196,16 +207,25 @@ class CPUP(object):
 
 class dealerP(object):
     def play():
-        if sum(dealerHand) < 17:
+        players = [sum(CPU1Hand), sum(CPU2Hand), sum(playerHand)]
+        players.sort()
+        print(players[0], players[2])
+        if sum(dealerHand) < players[2]:
             dealC.hit(dealerHand)
 
         else:
             # if len(standText) <= 1:
                 # if dealerHand == self.CPUS[self.selPlayer]:
-            standText.append(drawText(black, 30, (int(screenSize[0]/2), 540), True))
+            standText.append(drawText(black, 30, (int(screenSize[0]/2), 100), True))
                     # allstand.append("1")
 
-
+# a;lksdjf;alskdfja;lskjfd;aslkjf
+# if "p" in allstand and "1" in allstand and "2" in allstand:
+#             print(cardsL)
+#             cardsL.remove(self.dealHidden)
+            
+#             print(cardsL)
+#             window.blit(self.dealHide, (self.x - int(img.get_width() / 2), self.y - int(img.get_height() / 2)))
 
 
 def redraw():
@@ -215,7 +235,12 @@ def redraw():
     for i in hitText:
         i.draw("hit")
     for i in cardsL:
-        i.draw()
+        print(cardsL[6])
+        if cardsL[6] == i:
+            print("working")
+            window.blit(dealHide, (screenSize[0]/2 - 75, 234))
+        else:
+            i.draw()
     
     if 11 in playerHand and sum(playerHand) > 21:
         playerHand.remove(11)
@@ -230,7 +255,11 @@ def redraw():
         playerHandT.draw(str(sum(playerHand)))
         CPU1T.draw(str(sum(CPU1Hand)))
         CPU2T.draw(str(sum(CPU2Hand)))
-        dealerT.draw(str(sum(dealerHand)))
+        if "p" in allstand and "1" in allstand and "2" in allstand:
+            dealerT.draw(str(sum(dealerHand)))
+        else:
+            dealerT.draw("~")
+            
     
 
     
@@ -239,7 +268,7 @@ def redraw():
 
 def delayHit():
     global hitCPU
-    
+    global dealerH
     while True:
         if deal == True:
             sleep(1)
@@ -267,9 +296,10 @@ dealC = dealC()
 dealC.dealF()
 
 CPUP = CPUP()
-
+dealHide = pygame.transform.scale(pygame.image.load(FlexyPath + "/Cards/Front/"+ list(cardShuffle.sCards)[6] + ".png").convert_alpha(), (150, 213))
 hitCPU = False
 hitP = False
+dealerH = False
 standP = False
 while running:
     redraw()
@@ -302,11 +332,9 @@ while running:
         standText.append(drawText(black, 30, (int(screenSize[0]/2 - 20), 540), True))
         standP = False
 
-    print(allstand)
-    if "p" in allstand and "1" in allstand and "2" in allstand:
-        print("dealer")
-        dealerP.play()
 
+    if dealerH == True:
+        dealerP.play()
     if hitP == True:
         dealC.hit(playerHand)
         
