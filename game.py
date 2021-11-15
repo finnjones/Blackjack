@@ -7,7 +7,7 @@ import logging
 import threading
 from cards import *
 from time import sleep
-# from CPU import *
+
 pygame.init()
 
 black = (0, 0, 0)
@@ -83,11 +83,7 @@ class cards(object):
 
 
     def draw(self):
-        
         img = pygame.transform.rotate(self.card, self.rot)
-        # if "p" in allstand and "1" in allstand and "2" in allstand: 
-        #     window.blit(self.dealHide, (self.x - int(img.get_width() / 2), self.y - int(img.get_height() / 2)))
-        # else:
         window.blit(img, (self.x - int(img.get_width() / 2), self.y - int(img.get_height() / 2)))
         
 
@@ -118,12 +114,6 @@ class drawText(object):
             self.counter = self.counter * 0.85
             self.textF.set_alpha(self.counter)
             self.y -= 1
-
-            # if self.counter * 0.91 < 1:
-            #     if self.text == "hit":
-            #         hitText.remove(self)
-            #     elif self.text == "stand":
-            #         standText.remove(self)
 
         self.textRect = self.textF.get_rect()
         self.loc = (self.x, self.y)
@@ -203,29 +193,20 @@ class CPUP(object):
 
             if self.selPlayer + 1 < len(self.CPUS):
                 self.selPlayer += 1
-
+standD = False
 
 class dealerP(object):
     def play():
+        global standD
         players = [sum(CPU1Hand), sum(CPU2Hand), sum(playerHand)]
         players.sort()
-        print(players[0], players[2])
-        if sum(dealerHand) < players[2]:
+        if sum(dealerHand) <= players[2]:
             dealC.hit(dealerHand)
 
-        else:
-            # if len(standText) <= 1:
-                # if dealerHand == self.CPUS[self.selPlayer]:
+        elif standD == False:
+            standD = True
             standText.append(drawText(black, 30, (int(screenSize[0]/2), 100), True))
-                    # allstand.append("1")
 
-# a;lksdjf;alskdfja;lskjfd;aslkjf
-# if "p" in allstand and "1" in allstand and "2" in allstand:
-#             print(cardsL)
-#             cardsL.remove(self.dealHidden)
-            
-#             print(cardsL)
-#             window.blit(self.dealHide, (self.x - int(img.get_width() / 2), self.y - int(img.get_height() / 2)))
 
 
 def redraw():
@@ -235,12 +216,11 @@ def redraw():
     for i in hitText:
         i.draw("hit")
     for i in cardsL:
-        print(cardsL[6])
+        i.draw()
         if cardsL[6] == i:
-            print("working")
-            window.blit(dealHide, (screenSize[0]/2 - 75, 234))
-        else:
-            i.draw()
+            if "p" in allstand and "1" in allstand and "2" in allstand:
+                window.blit(dealHide, (screenSize[0]/2 - 75, 234))
+        
     
     if 11 in playerHand and sum(playerHand) > 21:
         playerHand.remove(11)
@@ -259,8 +239,6 @@ def redraw():
             dealerT.draw(str(sum(dealerHand)))
         else:
             dealerT.draw("~")
-            
-    
 
     
     pygame.display.flip()
@@ -332,12 +310,10 @@ while running:
         standText.append(drawText(black, 30, (int(screenSize[0]/2 - 20), 540), True))
         standP = False
 
-
     if dealerH == True:
         dealerP.play()
     if hitP == True:
         dealC.hit(playerHand)
-        
         hitP = False
 
     if hitCPU == True:
