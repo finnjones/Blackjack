@@ -30,6 +30,7 @@ CPU2Hand = []
 dealerHand = []
 hitText = []
 standText = []
+bustText = []
 allstand = []
 cardSelector = 0
 
@@ -114,6 +115,8 @@ class drawText(object):
             self.counter = self.counter * 0.85
             self.textF.set_alpha(self.counter)
             self.y -= 1
+            
+                
 
         self.textRect = self.textF.get_rect()
         self.loc = (self.x, self.y)
@@ -164,10 +167,16 @@ class dealC(object):
 
         if hand == dealerHand:
             cards(screenSize[0]/2, 0, (screenSize[0] * ajustment + offsets, 340 - offsets))
-            hitText.append(drawText(black, 30, (int(screenSize[0] * ajustment), 100), True))
+            if sum(hand) <= 21:
+                hitText.append(drawText(black, 30, (int(screenSize[0] * ajustment), 100), True))
+            # else:
+            #     bustText.append(drawText(black, 30, (int(screenSize[0] * ajustment), 100), True))
         else:
             cards(screenSize[0]/2, 0, (screenSize[0] * ajustment + offsets, 780 - offsets))
-            hitText.append(drawText(black, 30, (int(screenSize[0] * ajustment), 540), True))
+            if sum(hand) <= 21:
+                hitText.append(drawText(black, 30, (int(screenSize[0] * ajustment), 540), True))
+            # else:
+            #     bustText.append(drawText(black, 30, (int(screenSize[0] * ajustment), 540), True))
         cardSelector += 1
     
 
@@ -182,13 +191,16 @@ class CPUP(object):
         if sum(self.CPUS[self.selPlayer]) < 17:
             
             dealC.hit(self.CPUS[self.selPlayer])
+        
         else:
             if len(standText) <= 1:
                 if CPU1Hand == self.CPUS[self.selPlayer]:
-                    standText.append(drawText(black, 30, (int(screenSize[0]* 0.25), 540), True))
+                    if sum(CPU1Hand) <= 21:
+                        standText.append(drawText(black, 30, (int(screenSize[0]* 0.25), 540), True))
                     allstand.append("1")
                 if CPU2Hand == self.CPUS[self.selPlayer]:
-                    standText.append(drawText(black, 30, (int(screenSize[0]* 0.75), 540), True))
+                    if sum(CPU2Hand) <= 21:
+                        standText.append(drawText(black, 30, (int(screenSize[0]* 0.75), 540), True))
                     allstand.append("2")
 
             if self.selPlayer + 1 < len(self.CPUS):
@@ -200,37 +212,69 @@ class dealerP(object):
         global standD
         players = [sum(CPU1Hand), sum(CPU2Hand), sum(playerHand)]
         players.sort()
-        if sum(dealerHand) <= players[2]:
+        if sum(dealerHand) <= 16:
             dealC.hit(dealerHand)
 
         elif standD == False:
             standD = True
             standText.append(drawText(black, 30, (int(screenSize[0]/2), 100), True))
 
-
+deezNutz = False
 
 def redraw():
+    global deezNutz
     window.fill(green)
     for i in standText:
-        i.draw("stand")
+        i.draw("Stand")
     for i in hitText:
-        i.draw("hit")
+        i.draw("Hit")
     for i in cardsL:
         i.draw()
         if cardsL[6] == i:
             if "p" in allstand and "1" in allstand and "2" in allstand:
                 window.blit(dealHide, (screenSize[0]/2 - 75, 234))
+    for i in bustText:
+        i.draw("Bust")
+        print(i.counter)
+        if i.counter <= 1:
+            bustText.remove(i)
         
+        
+    allHands = [[playerHand, 0.5], [CPU1Hand, 0.25], [CPU2Hand, 0.75], [dealerHand, 0.5]]
+
+    for i in allHands:
+        if sum(i[0]) > 21:
+            if 11 in i[0]:
+                for l in i[0]:
+                    if l == 11:
+                        i[0].remove(11)
+                        i[0].append(1)
+
+                print(i[0])
+                print(i)
+
+            elif deezNutz == False:
+                if i != dealerHand:
+                    bustText.append(drawText(black, 30, (int(screenSize[0]* i[1]), 540), True))
+                else:
+                    bustText.append(drawText(black, 30, (int(screenSize[0]* i[1]), 100), True))
+                deezNutz = True
+            
+                # i[0].append(1)
     
-    if 11 in playerHand and sum(playerHand) > 21:
-        playerHand.remove(11)
-        playerHand.append(1)
-    if 11 in CPU1Hand and sum(CPU1Hand) > 21:
-        CPU1Hand.remove(11)
-        CPU1Hand.append(1)
-    if 11 in CPU2Hand and sum(CPU2Hand) > 21:
-        CPU2Hand.remove(11)
-        CPU2Hand.append(1)
+    # print(bustText)
+    # if 11 in playerHand and sum(playerHand) > 21:
+    #     playerHand.remove(11)
+    #     playerHand.append(1)
+    # if 11 in CPU1Hand and sum(CPU1Hand) > 21:
+    #     CPU1Hand.remove(11)
+    #     CPU1Hand.append(1)
+    # if 11 in CPU2Hand and sum(CPU2Hand) > 21:
+    #     CPU2Hand.remove(11)
+    #     CPU2Hand.append(1)
+    # if 11 in dealerHand and sum(dealerHand) > 21:
+    #     dealerHand.remove(11)
+    #     dealerHand.append(1)
     if deal == True:
         playerHandT.draw(str(sum(playerHand)))
         CPU1T.draw(str(sum(CPU1Hand)))
@@ -312,12 +356,17 @@ while running:
 
     if dealerH == True:
         dealerP.play()
-    if hitP == True:
+    
+    if hitP == True and sum(playerHand) <= 21:
+
         dealC.hit(playerHand)
         hitP = False
+        
+        if sum(playerHand) > 21:
+            allstand.append("p")
 
     if hitCPU == True:
-        CPUP.play()
+        # CPUP.play()
         if "p" in allstand and "1" in allstand and "2" in allstand:
             dealerP.play()
         else:
