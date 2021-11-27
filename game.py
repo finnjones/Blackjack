@@ -3,7 +3,7 @@ from pygame.locals import *
 import os
 import random
 import math
-import logging
+import sys
 import threading
 from cards import *
 from time import sleep
@@ -23,16 +23,7 @@ FlexyPath = os.path.dirname(os.path.abspath(__file__))
 screenSize = (1620 , 1000)
 
 window = pygame.display.set_mode(screenSize)
-cardsL = []
-playerHand = []
-CPU1Hand = []
-CPU2Hand = []
-dealerHand = []
-hitText = []
-standText = []
-bustText = []
-allstand = []
-cardSelector = 0
+
 
 class cards(object):
     global hitCPU
@@ -45,16 +36,16 @@ class cards(object):
         self.rFriction = 0.5
         self.pos = pos
         self.rot = 0
-        if cardSelector == 6:
+        if mainLoop.cardSelector == 6:
             self.card = pygame.transform.scale(pygame.image.load(FlexyPath + "/Cards/Back/Blue.png").convert_alpha(), (150, 213))
         else:
-            self.card = pygame.transform.scale(pygame.image.load(FlexyPath + "/Cards/Front/" + list(cardShuffle.sCards)[cardSelector] + ".png").convert_alpha(), (150, 213))
+            self.card = pygame.transform.scale(pygame.image.load(FlexyPath + "/Cards/Front/" + list(cardShuffle.sCards)[mainLoop.cardSelector] + ".png").convert_alpha(), (150, 213))
 
         
         self.Playerpos = (self.x, self.y)
 
         self.ang = ((vec(self.pos) - self.Playerpos).angle_to(vec(1, 0))*-1)
-        cardsL.append(self)
+        mainLoop.cardsL.append(self)
         
         
     def slideCards(self):
@@ -89,7 +80,7 @@ class cards(object):
         
 
 
-class cardShuffle():
+class cardShuffleC():
     def shuffle(self): 
         self.l = list(cardDict.items())
         random.shuffle(self.l)
@@ -122,38 +113,37 @@ class drawText(object):
         self.loc = (self.x, self.y)
         window.blit(self.textF, self.loc)
         
-class dealC(object):
-    global cardSelector
+class dealCC(object):
+    
     def __init__(self):
-        self.hands = [[playerHand, 0.5], [CPU1Hand, 0.25], [CPU2Hand, 0.75]]
+        self.hands = [[mainLoop.playerHand, 0.5], [mainLoop.CPU1Hand, 0.25], [mainLoop.CPU2Hand, 0.75]]
         self.locY = 780
         
-        self.CPUS = [CPU1Hand, CPU2Hand]
+        self.CPUS = [mainLoop.CPU1Hand, mainLoop.CPU2Hand]
         self.selPlayer = 0
 
     def dealF(self):
-        global cardSelector
+        
 
         
 
         for i in self.hands:
             cards(screenSize[0]/2, 0, (screenSize[0]*i[1], self.locY))
-            i[0].append(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
-            cardSelector += 1
+            i[0].append(cardShuffle.sCards[list(cardShuffle.sCards)[mainLoop.cardSelector]])
+            mainLoop.cardSelector += 1
             cards(screenSize[0]/2, 0, (screenSize[0]*i[1] + 40, self.locY - 40))
-            i[0].append(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
-            cardSelector += 1
+            i[0].append(cardShuffle.sCards[list(cardShuffle.sCards)[mainLoop.cardSelector]])
+            mainLoop.cardSelector += 1
 
         cards(screenSize[0]/2, 0, (screenSize[0]*0.5, 340))
-        dealerHand.append(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
-        cardSelector += 1
+        mainLoop.dealerHand.append(cardShuffle.sCards[list(cardShuffle.sCards)[mainLoop.cardSelector]])
+        mainLoop.cardSelector += 1
         cards(screenSize[0]/2, 0, (screenSize[0]*0.5 + 40, 340 - 40))
-        dealerHand.append(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
+        mainLoop.dealerHand.append(cardShuffle.sCards[list(cardShuffle.sCards)[mainLoop.cardSelector]])
         
-        cardSelector += 1
+        mainLoop.cardSelector += 1
 
     def hit(self, hand):
-        global cardSelector
         ajustment = 0.5
         offsets = 40 * (len(hand))
         
@@ -163,30 +153,29 @@ class dealC(object):
         
 
         
-        hand.append(cardShuffle.sCards[list(cardShuffle.sCards)[cardSelector]])
+        hand.append(cardShuffle.sCards[list(cardShuffle.sCards)[mainLoop.cardSelector]])
 
-        if hand == dealerHand:
+        if hand == mainLoop.dealerHand:
             cards(screenSize[0]/2, 0, (screenSize[0] * ajustment + offsets, 340 - offsets))
             if sum(hand) <= 21:
-                hitText.append(drawText(black, 30, (int(screenSize[0] * ajustment), 100), True))
+                mainLoop.hitText.append(drawText(black, 30, (int(screenSize[0] * ajustment), 100), True))
             # else:
             #     bustText.append(drawText(black, 30, (int(screenSize[0] * ajustment), 100), True))
         else:
-            print("running")
             cards(screenSize[0]/2, 0, (screenSize[0] * ajustment + offsets, 780 - offsets))
             if sum(hand) <= 21:
-                print("running2")
 
-                hitText.append(drawText(black, 30, (int(screenSize[0] * ajustment), 540), True))
+
+                mainLoop.hitText.append(drawText(black, 30, (int(screenSize[0] * ajustment), 540), True))
             # else:
-            #     bustText.append(drawText(black, 30, (int(screenSize[0] * ajustment), 540), True))
-        cardSelector += 1
+            #     mainLoop.bustText.append(drawText(black, 30, (int(screenSize[0] * ajustment), 540), True))
+        mainLoop.cardSelector += 1
     
 
 
-class CPUP(object):
+class CPUPC(object):
     def __init__(self):
-        self.CPUS = [CPU1Hand, CPU2Hand]
+        self.CPUS = [mainLoop.CPU1Hand, mainLoop.CPU2Hand]
         self.selPlayer = 0
         
     def play(self):
@@ -196,16 +185,16 @@ class CPUP(object):
             dealC.hit(self.CPUS[self.selPlayer])
         
         else:
-            if len(standText) <= 1:
-                if CPU1Hand == self.CPUS[self.selPlayer]:
-                    if sum(CPU1Hand) <= 21:
-                        standText.append(drawText(black, 30, (int(screenSize[0]* 0.25), 540), True))
-                    allstand.append("1")
+            if len(mainLoop.standText) <= 1:
+                if mainLoop.CPU1Hand == self.CPUS[self.selPlayer]:
+                    if sum(mainLoop.CPU1Hand) <= 21:
+                        mainLoop.standText.append(drawText(black, 30, (int(screenSize[0]* 0.25), 540), True))
+                    mainLoop.allstand.append("1")
 
-                if CPU2Hand == self.CPUS[self.selPlayer]:
-                    if sum(CPU2Hand) <= 21:
-                        standText.append(drawText(black, 30, (int(screenSize[0]* 0.75), 540), True))
-                    allstand.append("2")
+                if mainLoop.CPU2Hand == self.CPUS[self.selPlayer]:
+                    if sum(mainLoop.CPU2Hand) <= 21:
+                        mainLoop.standText.append(drawText(black, 30, (int(screenSize[0]* 0.75), 540), True))
+                    mainLoop.allstand.append("2")
 
             if self.selPlayer + 1 < len(self.CPUS):
                 self.selPlayer += 1
@@ -214,34 +203,31 @@ standD = False
 class dealerP(object):
     def play():
         global standD
-        players = [sum(CPU1Hand), sum(CPU2Hand), sum(playerHand)]
+        players = [sum(mainLoop.CPU1Hand), sum(mainLoop.CPU2Hand), sum(mainLoop.playerHand)]
         players.sort()
-        if sum(dealerHand) <= 16:
-            dealC.hit(dealerHand)
+        if sum(mainLoop.dealerHand) <= 16:
+            dealC.hit(mainLoop.dealerHand)
 
         elif standD == False:
             standD = True
-            standText.append(drawText(black, 30, (int(screenSize[0]/2), 100), True))
+            mainLoop.standText.append(drawText(black, 30, (int(screenSize[0]/2), 100), True))
 
 deezNutz = False
-
 def redraw():
+    counter = -1
     global deezNutz
     window.fill(green)
-    for i in standText:
-        i.draw("Stand")
-    for i in hitText:
-        i.draw("Hit")
-    for i in cardsL:
+
+    for i in mainLoop.cardsL:
         i.draw()
-        if cardsL[6] == i:
-            if "p" in allstand and "1" in allstand and "2" in allstand:
+        if mainLoop.cardsL[6] == i:
+            if "3" in mainLoop.allstand and "1" in mainLoop.allstand and "2" in mainLoop.allstand:
                 window.blit(dealHide, (screenSize[0]/2 - 75, 234))
 
-    allHands = [[playerHand, 0.5], [CPU1Hand, 0.25], [CPU2Hand, 0.75], [dealerHand, 0.5]]
-
+    allHands = [[mainLoop.CPU1Hand, 0.25], [mainLoop.CPU2Hand, 0.75], [mainLoop.playerHand, 0.5], [mainLoop.dealerHand, 0.5]]
 
     for i in allHands:
+        counter += 1
         if sum(i[0]) > 21:
             if 11 in i[0]:
                 for l in i[0]:
@@ -250,30 +236,38 @@ def redraw():
                         i[0].append(1)
 
 
-            elif deezNutz == False:
-                if i != dealerHand:
-                    bustText.append(drawText(black, 30, (int(screenSize[0]* i[1]), 540), True))
+            elif not str(counter) in mainLoop.allstand:
+                if i[0] != mainLoop.dealerHand:
+                    mainLoop.bustText.append(drawText(black, 30, (int(screenSize[0]* i[1]), 540), True))
+                    mainLoop.allstand.append(str(counter))
+
                 else:
-                    bustText.append(drawText(black, 30, (int(screenSize[0]* i[1]), 100), True))
-                deezNutz = True
-    
-    for i in bustText:
-        i.draw("Bust")
-        if i.counter <= 1:
-            bustText.remove(i)
-    
+                    mainLoop.bustText.append(drawText(black, 30, (int(screenSize[0]* i[1]), 100), True))
+                    mainLoop.allstand.append(str(counter))
+    print()            
+         
+    if mainLoop.deal == True:
+        for i in mainLoop.standText:
+            i.draw("Stand")
+        for i in mainLoop.hitText:
+            i.draw("Hit")
+        for i in mainLoop.bustText:
+            i.draw("Bust")
+            # if i.counter <= 1:
+            #     mainLoop.bustText.remove(i)
+    print(mainLoop.bustText)
         
         
 
 
-    if deal == True:
-        playerHandT.draw(str(sum(playerHand)))
-        CPU1T.draw(str(sum(CPU1Hand)))
-        CPU2T.draw(str(sum(CPU2Hand)))
-        if "p" in allstand and "1" in allstand and "2" in allstand:
-            dealerT.draw(str(sum(dealerHand)))
+    if mainLoop.deal == True:
+        mainLoop.playerHandT.draw(str(sum(mainLoop.playerHand)))
+        mainLoop.CPU1T.draw(str(sum(mainLoop.CPU1Hand)))
+        mainLoop.CPU2T.draw(str(sum(mainLoop.CPU2Hand)))
+        if "3" in mainLoop.allstand and "1" in mainLoop.allstand and "2" in mainLoop.allstand:
+            mainLoop.dealerT.draw(str(sum(mainLoop.dealerHand)))
         else:
-            dealerT.draw("~")
+            mainLoop.dealerT.draw("~")
 
     
     pygame.display.flip()
@@ -283,85 +277,141 @@ def delayHit():
     global hitCPU
     global dealerH
     while True:
-        if deal == True:
+        if mainLoop.deal == True:
             sleep(1)
-            hitCPU = True
+            if mainLoop.deal == True:
+                mainLoop.hitCPU = True
+
 
             
 
+class mainloop(object):
+    global running
+    def __init__(self):
+
+        self.cardsL = []
+        self.playerHand = []
+        self.CPU1Hand = []
+        self.CPU2Hand = []
+        self.dealerHand = []
+        self.hitText = []
+        self.standText = []
+        self.bustText = []
+        self.allstand = []
+        self.cardSelector = 0
+        
+
+        self.deal = False
+        
+        # cardShuffle.shuffle()
+        self.cardSelector = 0
+        self.playerHandT = drawText( black, 30, (screenSize[0]/2, 900), False)
+        self.CPU1T = drawText( black, 30, (screenSize[0]/4, 900), False)
+        self.CPU2T = drawText( black, 30, (screenSize[0]*0.75, 900), False)
+        self.dealerT = drawText( black, 30, (screenSize[0]/2, 460), False)
+
+        
+        # dealC.dealF()
+
+        
+        self.hitCPU = False
+        self.hitP = False
+        self.dealerH = False
+        self.standP = False
+        self.reset = False
+    def loop(self):
+        global running
+        redraw()
+        clock.tick(60)
+        fps = str(int(clock. get_fps()))
+        pygame.display.set_caption(fps)
+        
+        for event in pygame.event.get():
+            keys = pygame.key.get_pressed()
+            if event.type == pygame.QUIT:
+                running = False
+            
+            
+            if keys[pygame.K_SPACE]:
+                self.deal = True
+            
+            if keys[pygame.K_r]:
+                self.reset = True
+
+            if self.reset == True:
+                reInit()
+                self.reset = False
+
+
+            if keys[pygame.K_h] and "1" in self.allstand and "2" in self.allstand:
+                self.hitP = True
+
+            if keys[pygame.K_s] and "1" in self.allstand and "2" in self.allstand:
+                self.standP = True
+
+
+        if self.deal == True:
+            for i in self.cardsL:
+                i.slideCards()
+        
+            if self.standP == True:
+                self.allstand.append("3")
+                self.standText.append(drawText(black, 30, (int(screenSize[0]/2 - 20), 540), True))
+                self.standP = False
+
+            if self.dealerH == True:
+                dealerP.play()
+            
+            if self.hitP == True and sum(self.playerHand) <= 21:
+
+                dealC.hit(self.playerHand)
+                self.hitP = False
+
+                        
+                if sum(self.playerHand) > 21 and not 11 in self.playerHand:
+                    self.allstand.append("3")
+
+
+            if self.hitCPU == True:
+                if "3" in self.allstand and "1" in self.allstand and "2" in self.allstand:
+                    dealerP.play()
+                elif not "2" in self.allstand:
+                    
+                    CPUP.play()
+                self.hitCPU = False
+def reInit():
+    global mainLoop
+    global cardShuffle
+    global dealC
+    global CPUP
+    global t1
+    global dealHide
+    global running
+
+    mainLoop = mainloop()
+    dealC = dealCC()
+    CPUP = CPUPC()
+    cardShuffle.shuffle()
+    dealC.dealF()
+    dealHide = pygame.transform.scale(pygame.image.load(FlexyPath + "/Cards/Front/"+ list(cardShuffle.sCards)[6] + ".png").convert_alpha(), (150, 213))
+
+
+mainLoop = mainloop()
+cardShuffle = cardShuffleC()
+dealC = dealCC()
+CPUP = CPUPC()
 t1 = threading.Thread(target=delayHit) 
 t1.daemon = True
+t1.start()
+cardShuffle.shuffle()
+dealC.dealF()
+dealHide = pygame.transform.scale(pygame.image.load(FlexyPath + "/Cards/Front/"+ list(cardShuffle.sCards)[6] + ".png").convert_alpha(), (150, 213))
+running = True
+
+    
 
 running = True
-deal = False
-cardShuffle = cardShuffle()
-cardShuffle.shuffle()
-cardSelector = 0
-playerHandT = drawText( black, 30, (screenSize[0]/2, 900), False)
-CPU1T = drawText( black, 30, (screenSize[0]/4, 900), False)
-CPU2T = drawText( black, 30, (screenSize[0]*0.75, 900), False)
-dealerT = drawText( black, 30, (screenSize[0]/2, 460), False)
-
-t1.start()
-
-dealC = dealC()
-
-dealC.dealF()
-
-CPUP = CPUP()
-dealHide = pygame.transform.scale(pygame.image.load(FlexyPath + "/Cards/Front/"+ list(cardShuffle.sCards)[6] + ".png").convert_alpha(), (150, 213))
-hitCPU = False
-hitP = False
-dealerH = False
-standP = False
 while running:
-    redraw()
-    clock.tick(60)
-    fps = str(int(clock. get_fps()))
-    pygame.display.set_caption(fps)
+    mainLoop.loop()
     
-    for event in pygame.event.get():
-        keys = pygame.key.get_pressed()
-        if event.type == pygame.QUIT:
-            running = False
-        
-        
-        if keys[pygame.K_SPACE]:
-            deal = True
-        
-        if keys[pygame.K_h] and "1" in allstand and "2" in allstand:
-            hitP = True
-
-        if keys[pygame.K_s] and "1" in allstand and "2" in allstand:
-            standP = True
-
-
-    if deal == True:
-        for i in cardsL:
-            i.slideCards()
-    
-    if standP == True:
-        allstand.append("p")
-        standText.append(drawText(black, 30, (int(screenSize[0]/2 - 20), 540), True))
-        standP = False
-
-    if dealerH == True:
-        dealerP.play()
-    
-    if hitP == True and sum(playerHand) <= 21:
-
-        dealC.hit(playerHand)
-        hitP = False
-
-                
-        if sum(playerHand) > 21 and not 11 in playerHand:
-            allstand.append("p")
-
-    if hitCPU == True:
-        if "p" in allstand and "1" in allstand and "2" in allstand:
-            dealerP.play()
-        else:
-            CPUP.play()
-        hitCPU = False
-
 pygame.quit()
