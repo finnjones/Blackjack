@@ -1,12 +1,11 @@
 import pygame
-from pygame import event
 from pygame.locals import *
 import os
 import random
 import math
+import sys
 import threading
 from cards import *
-from text import *
 from time import sleep
 
 pygame.init()
@@ -18,8 +17,6 @@ brown = (139,69,19)
 red = (255, 0, 0)
 grey = (128,128,128)
 
-
-lightGrey = (211,211,211)
 clock = pygame.time.Clock()
 vec = pygame.math.Vector2
 FlexyPath = os.path.dirname(os.path.abspath(__file__))
@@ -27,7 +24,6 @@ screenSize = (1620 , 1000)
 
 window = pygame.display.set_mode(screenSize)
 
-bankBalance = 1000
 
 class cards(object):
     global hitCPU
@@ -83,7 +79,42 @@ class cards(object):
         self.card = pygame.transform.scale(self.card, (int(150/self.split), int(213/self.split)))
         img = pygame.transform.rotate(self.card, self.rot)
         window.blit(img, (self.x - int(img.get_width() / 2), self.y - int(img.get_height() / 2)))
-          
+        
+
+
+class cardShuffleC():
+    def shuffle(self): 
+        self.l = list(cardDict.items())
+        random.shuffle(self.l)
+        self.sCards = dict(self.l)
+
+class drawText(object):
+    def __init__(self, colour, size, loc, fade):
+        self.fade = fade
+        self.size = size
+        self.colour = colour
+        self.loc = loc
+        self.font = pygame.font.Font(FlexyPath + '/font/quicksand.ttf', self.size)
+        self.counter = 290
+        
+
+    def draw(self, text):
+        self.x = self.loc[0]
+        self.y = self.loc[1]
+        self.text = text
+
+        self.textF = self.font.render(self.text, True, self.colour)
+        if self.fade == True:
+            self.counter = self.counter * 0.85
+            self.textF.set_alpha(self.counter)
+            self.y -= 1
+            
+                
+
+        self.textRect = self.textF.get_rect()
+        self.loc = (self.x, self.y)
+        window.blit(self.textF, self.loc)
+        
 class dealCC(object):
     
     def __init__(self):
@@ -141,6 +172,7 @@ class dealCC(object):
             # else:
             #     mainLoop.bustText.append(drawText(black, 30, (int(screenSize[0] * ajustment), 540), True))
         mainLoop.cardSelector += 1
+    
 
 class betting(object):
     global mainLoop
@@ -200,6 +232,8 @@ class split():
     def test():
         mainLoop.cardsL[0]
 
+
+
 class CPUPC(object):
     def __init__(self):
         self.CPUS = [mainLoop.CPU1Hand, mainLoop.CPU2Hand]
@@ -242,66 +276,16 @@ class dealerP(object):
                 mainLoop.standText.append(drawText(black, 30, (int(screenSize[0]/2), 100), True))
                 mainLoop.allstand.append("4")
 
-class titleScreenF(object):
-    def __init__(self):
-        self.title = drawText(black, 100, (10, 0), False)
-        self.owner = drawText(black, 50, (15, 100), False)
-    def draw(self):
-        self.title.draw("Blackjack")
-        self.owner.draw("By Finn Jones")
-
-class button(object):
-    def __init__(self, x, y, text):
-        self.x = x
-        self.y = y
-        self.text = text
-        self.rectangle = pygame.Rect(self.x,self.y,240,50)
-        self.msel = "Shares"
-        self.t = drawText(black, 40, (self.x + 35, self.y + 5), False)
-    def draw(self):
-        global enemies
-        global wave
-        global shots
-        global autoGun
-        global sheild
-        self.colour = lightGrey
-
-        self.font = pygame.font.Font(FlexyPath + '/font/quicksand.ttf', 40)
-        if self.rectangle.collidepoint(pygame.mouse.get_pos()):
-            
-            if pygame.mouse.get_pressed()[0]:
-                
-                self.msel = ""
-                self.colour = black
-                pygame.draw.rect(window, self.colour, self.rectangle)
-                self.t.draw(self.text)
-                if self.text == "Restart":
-                    pass
-                return self.text
-
-            else:
-                self.colour = grey
-
-
- 
-        pygame.draw.rect(window, self.colour, self.rectangle)
-        self.t.draw(self.text)
-
-        # showText(self.text, 40, (self.x + (120 - self.font.size(self.text)[0]/2), self.y + 5), black)   
-   
-
-
 
 def redraw():
-    global event
     counter = 0
     window.fill(green)
-    if mainLoop.deal == True:
-        for i in mainLoop.cardsL:
-            i.draw(1)
-            if mainLoop.cardsL[6] == i:
-                if "3" in mainLoop.allstand and "1" in mainLoop.allstand and "2" in mainLoop.allstand:
-                    window.blit(dealHide, (screenSize[0]/2 - 75, 234))
+
+    for i in mainLoop.cardsL:
+        i.draw(1)
+        if mainLoop.cardsL[6] == i:
+            if "3" in mainLoop.allstand and "1" in mainLoop.allstand and "2" in mainLoop.allstand:
+                window.blit(dealHide, (screenSize[0]/2 - 75, 234))
 
     allHands = [[mainLoop.CPU1Hand, 0.25], [mainLoop.CPU2Hand, 0.75], [mainLoop.playerHand, 0.5], [mainLoop.dealerHand, 0.5]]
 
@@ -334,6 +318,7 @@ def redraw():
         for i in mainLoop.bustText:
             i.draw("Bust")
 
+    mainLoop.bettingSys.draw()
     if mainLoop.minbuy == True:
         mainLoop.minB.draw("Minimum Buy In Of $10")
 
@@ -346,13 +331,9 @@ def redraw():
             mainLoop.dealerT.draw("Dealer: "+ str(sum(mainLoop.dealerHand)))
         else:
             mainLoop.dealerT.draw("Dealer: "+ "~")
-    mainLoop.startB.draw()
-    mainLoop.titleScreen.draw()
-    if mainLoop.start == True:
-        mainLoop.bettingSys.draw()
+
     mainLoop.bettingSys.win()
     pygame.display.flip()
-
 
 
 def delayHit():
@@ -362,8 +343,11 @@ def delayHit():
         if mainLoop.deal == True:
             sleep(1)
             if mainLoop.deal == True:
-                mainLoop.hitCPU = True    
+                mainLoop.hitCPU = True
 
+
+            
+bankBalance = 1000
 class mainloop(object):
     global running
     def __init__(self):
@@ -388,9 +372,7 @@ class mainloop(object):
         self.CPU2T = drawText( black, 30, (screenSize[0]*0.75 - 45, 900), False)
         self.dealerT = drawText( black, 30, (screenSize[0]/2 - 45, 460), False)
         self.minB = drawText( black, 30, (screenSize[0]/2 - 200, 460), True)
-        self.startB = button(screenSize[0]/2, 100, "hello")
         self.bettingSys = betting()
-        self.titleScreen = titleScreenF()
         self.dealerP = dealerP()
 
         
@@ -402,7 +384,6 @@ class mainloop(object):
         self.up = False
         self.down = False
         self.minbuy = False
-        self.start = False
     def loop(self):
         global running
         redraw()
@@ -474,6 +455,7 @@ class mainloop(object):
                     CPUP.play()
                 self.hitCPU = False
 
+            
 def reInit():
     global mainLoop
     global cardShuffle
@@ -503,6 +485,9 @@ dealC.dealF()
 dealHide = pygame.transform.scale(pygame.image.load(FlexyPath + "/Cards/Front/"+ list(cardShuffle.sCards)[6] + ".png").convert_alpha(), (150, 213))
 running = True
 
+    
+
+running = True
 while running:
     mainLoop.loop()
     

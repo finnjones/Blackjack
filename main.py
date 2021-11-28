@@ -1,8 +1,6 @@
-from CPU import *
 from game import *
+from text import *
 from cards import *
-
-# from placeholder import *
 
 
 
