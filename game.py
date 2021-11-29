@@ -256,7 +256,6 @@ class button(object):
         self.y = y
         self.text = text
         self.rectangle = pygame.Rect(self.x,self.y,240,50)
-        self.msel = "Shares"
         self.t = drawText(black, 40, (self.x + 35, self.y + 5), False)
     def draw(self):
         global enemies
@@ -275,8 +274,8 @@ class button(object):
                 self.colour = black
                 pygame.draw.rect(window, self.colour, self.rectangle)
                 self.t.draw(self.text)
-                if self.text == "Restart":
-                    pass
+                if self.text == "hello":
+                    mainLoop.start = True
                 return self.text
 
             else:
@@ -346,8 +345,9 @@ def redraw():
             mainLoop.dealerT.draw("Dealer: "+ str(sum(mainLoop.dealerHand)))
         else:
             mainLoop.dealerT.draw("Dealer: "+ "~")
-    mainLoop.startB.draw()
-    mainLoop.titleScreen.draw()
+    if mainLoop.start == False:
+        mainLoop.startB.draw()
+        mainLoop.titleScreen.draw()
     if mainLoop.start == True:
         mainLoop.bettingSys.draw()
     mainLoop.bettingSys.win()
