@@ -156,7 +156,8 @@ class betting(object):
         global bankBalance
 
         self.size = size
-        if (self.betA + self.size) >= 0 and (self.betA + self.size) <= bankBalance:
+        print(self.bankBalance - (self.size + self.betA))
+        if (self.betA + self.size) >= 0 and self.bankBalance - (self.size + self.betA) >= 0:
             self.betA += self.size
             bankBalance -= self.size
 
@@ -207,7 +208,7 @@ class CPUPC(object):
         
     def play(self):
 
-        if sum(self.CPUS[self.selPlayer]) < 17:
+        if sum(self.CPUS[self.selPlayer]) <= mainLoop.cpuThreshold:
             
             dealC.hit(self.CPUS[self.selPlayer])
         
@@ -233,7 +234,7 @@ class dealerP(object):
         global standD
         players = [sum(mainLoop.CPU1Hand), sum(mainLoop.CPU2Hand), sum(mainLoop.playerHand)]
         players.sort()
-        if sum(mainLoop.dealerHand) <= 16:
+        if sum(mainLoop.dealerHand) <= mainLoop.dealerThreshold:
             dealC.hit(mainLoop.dealerHand)
         
         elif self.standD == False:
@@ -246,37 +247,44 @@ class titleScreenF(object):
     def __init__(self):
         self.title = drawText(black, 100, (10, 0), False)
         self.owner = drawText(black, 50, (15, 100), False)
+        self.startB = button(screenSize[0]/2 - (240/2), 300, "Start", start)
+        self.optionsB = button(screenSize[0]/2 - (240/2), 400, "Options", options)
+
     def draw(self):
         self.title.draw("Blackjack")
         self.owner.draw("By Finn Jones")
+        self.startB.draw()
+        self.optionsB.draw()
+
+class optionScreenF(object):
+    def __init__(self):
+        self.title = drawText(black, 100, (10, 0), False)
+    def draw(self):
+        self.title.draw("Options")
 
 class button(object):
-    def __init__(self, x, y, text):
+    def __init__(self, x, y, text, function):
         self.x = x
         self.y = y
         self.text = text
-        self.rectangle = pygame.Rect(self.x,self.y,240,50)
-        self.t = drawText(black, 40, (self.x + 35, self.y + 5), False)
-    def draw(self):
-        global enemies
-        global wave
-        global shots
-        global autoGun
-        global sheild
-        self.colour = lightGrey
-
+        self.function = function
         self.font = pygame.font.Font(FlexyPath + '/font/quicksand.ttf', 40)
+        self.textSize = self.font.size(self.text)
+        self.rectangle = pygame.Rect(self.x,self.y,240,50)
+        self.t = drawText(black, 40, ((self.x + 240/2) - self.textSize[0]/2, (self.y + 50/2) - self.textSize[1]/2), False)
+    def draw(self):
+        self.colour = lightGrey
+        
         if self.rectangle.collidepoint(pygame.mouse.get_pos()):
             
             if pygame.mouse.get_pressed()[0]:
-                
-                self.msel = ""
                 self.colour = black
                 pygame.draw.rect(window, self.colour, self.rectangle)
                 self.t.draw(self.text)
-                if self.text == "hello":
-                    mainLoop.start = True
-                return self.text
+                self.function()
+                # if self.text == "Start":
+                #     mainLoop.start = True
+                # return self.text
 
             else:
                 self.colour = grey
@@ -288,8 +296,15 @@ class button(object):
 
         # showText(self.text, 40, (self.x + (120 - self.font.size(self.text)[0]/2), self.y + 5), black)   
    
+def start():
+    mainLoop.start = True
+    mainLoop.startMenu = False
+    print("start")
 
-
+def options():
+    mainLoop.startMenu = False
+    mainLoop.optionMenu = True
+    print("options")
 
 def redraw():
     global event
@@ -345,15 +360,17 @@ def redraw():
             mainLoop.dealerT.draw("Dealer: "+ str(sum(mainLoop.dealerHand)))
         else:
             mainLoop.dealerT.draw("Dealer: "+ "~")
-    if mainLoop.start == False:
-        mainLoop.startB.draw()
+    if mainLoop.startMenu == True:
         mainLoop.titleScreen.draw()
+
+    if mainLoop.optionMenu == True:
+        mainLoop.optionScreen.draw()
     if mainLoop.start == True:
         mainLoop.bettingSys.draw()
+
+
     mainLoop.bettingSys.win()
     pygame.display.flip()
-
-
 
 def delayHit():
     global hitCPU
@@ -376,21 +393,22 @@ class mainloop(object):
         self.hitText = []
         self.standText = []
         self.bustText = []
-        self.allstand = []
-        self.cardSelector = 0
-        
+        self.allstand = []        
 
         self.deal = False
         
         self.cardSelector = 0
+        self.cpuThreshold = 16
+        self.dealerThreshold = 17
+
         self.playerHandT = drawText( black, 30, (screenSize[0]/2 - 45, 900), False)
         self.CPU1T = drawText( black, 30, (screenSize[0]/4 - 45, 900), False)
         self.CPU2T = drawText( black, 30, (screenSize[0]*0.75 - 45, 900), False)
         self.dealerT = drawText( black, 30, (screenSize[0]/2 - 45, 460), False)
         self.minB = drawText( black, 30, (screenSize[0]/2 - 200, 460), True)
-        self.startB = button(screenSize[0]/2, 100, "hello")
         self.bettingSys = betting()
         self.titleScreen = titleScreenF()
+        self.optionScreen = optionScreenF()
         self.dealerP = dealerP()
 
         
@@ -403,6 +421,8 @@ class mainloop(object):
         self.down = False
         self.minbuy = False
         self.start = False
+        self.startMenu = True
+        self.optionMenu = False
     def loop(self):
         global running
         redraw()
@@ -423,6 +443,9 @@ class mainloop(object):
 
                 if event.key == pygame.K_h and "1" in self.allstand and "2" in self.allstand:
                     self.hitP = True
+
+                if event.key == pygame.K_s and "1" in self.allstand and "2" in self.allstand:
+                    self.standP = True
         
             if keys[pygame.K_SPACE]:
                 if int(self.bettingSys.betA) != 0:
@@ -441,8 +464,7 @@ class mainloop(object):
 
 
 
-            if keys[pygame.K_s] and "1" in self.allstand and "2" in self.allstand:
-                self.standP = True
+
                 
         if self.deal == True:
             
