@@ -146,8 +146,16 @@ class betting(object):
     global mainLoop
     global bankBalance
     def __init__(self):
-        self.bankT = drawText(black, 30, (100, 50), False)
-        self.betT = drawText(black, 30, (100, 100), False)
+
+        self.bankT = drawText(black, 50, (screenSize[0]/2 - 140, 100), False)
+        self.betT = drawText(black, 30, (screenSize[0]/2 - 50, 260), False)
+        self.addCpuT = button((screenSize[0]/2 - (50/2) - 100, 260), (50,50), "-", (betting.betM))
+        self.minusCpuT = button((screenSize[0]/2 - (50/2) + 100, 260), (50,50), "+", (betting.betA))
+        self.back = button((screenSize[0]/2 - (250/2), 500), (240,50), "Back", (backF))
+
+        self.deal = button((screenSize[0]/2 - (250/2), 400), (240,50), "Deal", (deal))
+
+        self.title = drawText(black, 100, (10, 0), False)
         self.bankBalance = bankBalance
         self.betA = 0
         self.stop = False
@@ -156,10 +164,16 @@ class betting(object):
         global bankBalance
 
         self.size = size
-        print(self.bankBalance - (self.size + self.betA))
         if (self.betA + self.size) >= 0 and self.bankBalance - (self.size + self.betA) >= 0:
             self.betA += self.size
             bankBalance -= self.size
+
+    def betA():
+        mainLoop.bettingSys.bet(10)
+
+    def betM():
+        mainLoop.bettingSys.bet(-10)
+
 
     def win(self):
         global mainLoop
@@ -167,7 +181,7 @@ class betting(object):
         
         if self.stop == False:
             if "3" in mainLoop.allstand and "1" in mainLoop.allstand and "2" in mainLoop.allstand and "4" in mainLoop.allstand:
-                if sum(mainLoop.playerHand) > 21 or sum(mainLoop.playerHand) < sum(mainLoop.dealerHand):
+                if sum(mainLoop.playerHand) > 21 or sum(mainLoop.playerHand) < sum(mainLoop.dealerHand) and sum(mainLoop.dealerHand) <= 21:
                     self.betA = 0
                     self.stop = True
 
@@ -187,13 +201,23 @@ class betting(object):
                     bankBalance += self.betA
                     self.betA = 0
                     self.stop = True
-                
+        print(mainLoop.allstand)
 
 
 
 
     def draw(self):
-
+        if mainLoop.deal == True:
+            self.bankT = drawText(black, 50, (100, 50), False)
+            self.betT = drawText(black, 30, (100, 100), False)
+        else:
+            self.bankT = drawText(black, 50, (screenSize[0]/2 - 140, 100), False)
+            self.betT = drawText(black, 30, (screenSize[0]/2 - 50, 260), False)
+            self.title.draw("Betting")
+            self.deal.draw()
+            self.addCpuT.draw()
+            self.minusCpuT.draw()
+            self.back.draw()
         self.bankT.draw("Bank: $" + str(bankBalance))
         self.betT.draw("Bet: $" + str(self.betA))
 
@@ -208,24 +232,36 @@ class CPUPC(object):
         
     def play(self):
 
-        if sum(self.CPUS[self.selPlayer]) <= mainLoop.cpuThreshold:
+        if sum(self.CPUS[self.selPlayer]) < mainLoop.cpuThreshold:
             
             dealC.hit(self.CPUS[self.selPlayer])
-        
+
         else:
             if len(mainLoop.standText) <= 1:
                 if mainLoop.CPU1Hand == self.CPUS[self.selPlayer]:
                     if sum(mainLoop.CPU1Hand) <= 21:
                         mainLoop.standText.append(drawText(black, 30, (int(screenSize[0]* 0.25), 540), True))
                         mainLoop.allstand.append("1")
+                        
 
                 if mainLoop.CPU2Hand == self.CPUS[self.selPlayer]:
                     if sum(mainLoop.CPU2Hand) <= 21:
                         mainLoop.standText.append(drawText(black, 30, (int(screenSize[0]* 0.75), 540), True))
                         mainLoop.allstand.append("2")
-
+            
             if self.selPlayer + 1 < len(self.CPUS):
                 self.selPlayer += 1
+    def update(self):
+        if mainLoop.CPU1Hand == self.CPUS[self.selPlayer]:
+            mainLoop.colourDealer = black
+            mainLoop.colourPlayer = black
+            mainLoop.colourCPU1 = red
+            mainLoop.colourCPU2 = black
+        if mainLoop.CPU2Hand == self.CPUS[self.selPlayer] and not "2" in mainLoop.allstand:
+            mainLoop.colourDealer = black
+            mainLoop.colourPlayer = black
+            mainLoop.colourCPU1 = black
+            mainLoop.colourCPU2 = red
 
 class dealerP(object):
     def __init__(self):
@@ -234,10 +270,15 @@ class dealerP(object):
         global standD
         players = [sum(mainLoop.CPU1Hand), sum(mainLoop.CPU2Hand), sum(mainLoop.playerHand)]
         players.sort()
-        if sum(mainLoop.dealerHand) <= mainLoop.dealerThreshold:
+        if sum(mainLoop.dealerHand) < mainLoop.dealerThreshold:
             dealC.hit(mainLoop.dealerHand)
+            mainLoop.colourDealer = red
+            mainLoop.colourPlayer = black
+            mainLoop.colourCPU1 = black
+            mainLoop.colourCPU2 = black
         
         elif self.standD == False:
+            
             self.standD = True
             if not "4" in mainLoop.allstand:
                 mainLoop.standText.append(drawText(black, 30, (int(screenSize[0]/2), 100), True))
@@ -259,32 +300,42 @@ class titleScreenF(object):
 class optionScreenF(object):
     def __init__(self):
         self.title = drawText(black, 100, (10, 0), False)
-        self.addCpuT = button((screenSize[0]/2 - (50/2) - 100, 300), (50,50), "-", (optionScreenF.cpuM))
-        self.munusCpuT = button((screenSize[0]/2 - (50/2) + 100, 300), (50,50), "+", (optionScreenF.cpuA))
-        self.addDealerT = button((screenSize[0]/2 - (50/2) - 100, 400), (50,50), "-", (optionScreenF.cpuM))
-        self.munusDealerT = button((screenSize[0]/2 - (50/2) + 100, 400), (50,50), "+", (optionScreenF.cpuA))
-        self.cpuThreshT = drawText(black, 40, (screenSize[0]/2 - (40/2), 300, 0), False)
-        self.CPUTile = drawText(black, 40, (screenSize[0]/2 - 140, 200, 0), False)
-        
+        self.addCpuT = button((screenSize[0]/2 - (50/2) - 100, 260), (50,50), "-", (optionScreenF.cpuM))
+        self.minusCpuT = button((screenSize[0]/2 - (50/2) + 100, 260), (50,50), "+", (optionScreenF.cpuA))
+        self.addDealerT = button((screenSize[0]/2 - (50/2) - 100, 400), (50,50), "-", (optionScreenF.dealerM))
+        self.munusDealerT = button((screenSize[0]/2 - (50/2) + 100, 400), (50,50), "+", (optionScreenF.dealerA))
+        self.back = button((screenSize[0]/2 - (250/2), 500), (240,50), "Back", (backF))
+        self.cpuThreshT = drawText(black, 40, (screenSize[0]/2 - (40/2), 260, 0), False)
+        self.dealerThreshT = drawText(black, 40, (screenSize[0]/2 - (40/2), 400, 0), False)
+        self.CPUTitle = drawText(black, 40, (screenSize[0]/2 - 140, 200, 0), False)
+        self.dealerTitle = drawText(black, 40, (screenSize[0]/2 - 160, 350, 0), False)
 
     
     def draw(self):
         self.title.draw("Options")
-        self.CPUTile.draw("CPU Threshold")
+        self.dealerTitle.draw("Dealer Threshold")
+        self.CPUTitle.draw("CPU Threshold")
         self.cpuThreshT.draw(str(mainLoop.cpuThreshold))
+        self.dealerThreshT.draw(str(mainLoop.dealerThreshold))
         self.addCpuT.draw()
-        self.munusCpuT.draw()
+        self.minusCpuT.draw()
         self.addDealerT.draw()
         self.munusDealerT.draw()
+        self.back.draw()
         
     def cpuM():
-        if mainLoop.cpuThreshold > 0 :
+        if mainLoop.cpuThreshold > 1 :
             mainLoop.cpuThreshold -= 1
     def cpuA():
-        if mainLoop.cpuThreshold <= 21:
+        if mainLoop.cpuThreshold < 21:
             mainLoop.cpuThreshold += 1
-def test():
-    print("test")
+    def dealerM():
+        if mainLoop.dealerThreshold > 1 :
+            mainLoop.dealerThreshold -= 1
+    def dealerA():
+        if mainLoop.dealerThreshold < 21:
+            mainLoop.dealerThreshold += 1
+
 class button(object):
     def __init__(self, loc, size, text, function):
         self.loc = loc
@@ -300,7 +351,10 @@ class button(object):
     def draw(self):
         self.colour = lightGrey
         if self.rectangle.collidepoint(pygame.mouse.get_pos()):
+
+            
             if mainLoop.mouseClick == True:
+                
                 self.colour = black
                 pygame.draw.rect(window, self.colour, self.rectangle)
                 self.t.draw(self.text)
@@ -308,13 +362,10 @@ class button(object):
                 mainLoop.mouseClick = False
             else:
                 self.colour = grey
-            
 
- 
         pygame.draw.rect(window, self.colour, self.rectangle)
         self.t.draw(self.text)
 
-   
 def start():
     mainLoop.start = True
     mainLoop.startMenu = False
@@ -325,8 +376,21 @@ def options():
     mainLoop.optionMenu = True
     print("options")
 
+def backF():
+    mainLoop.start = False
+    mainLoop.startMenu = True
+    mainLoop.optionMenu = False
+
+def deal():
+    if int(mainLoop.bettingSys.betA) != 0:
+        mainLoop.deal = True
+    else:
+        mainLoop.minBet.append(drawText( black, 30, (screenSize[0]/2 - 165, 360), True))
+        mainLoop.minbuy = True
+
 def redraw():
     global event
+
     counter = 0
     window.fill(green)
     if mainLoop.deal == True:
@@ -367,10 +431,10 @@ def redraw():
         for i in mainLoop.bustText:
             i.draw("Bust")
 
-    if mainLoop.minbuy == True:
-        mainLoop.minB.draw("Minimum Buy In Of $10")
+    for i in mainLoop.minBet:
+        i.draw("Minimum Buy In Of $10")
 
-
+    CPUP.update()
     if mainLoop.deal == True:
         mainLoop.playerHandT.draw("Player: "+ str(sum(mainLoop.playerHand)))
         mainLoop.CPU1T.draw("CPU 1: "+ str(sum(mainLoop.CPU1Hand)))
@@ -379,14 +443,16 @@ def redraw():
             mainLoop.dealerT.draw("Dealer: "+ str(sum(mainLoop.dealerHand)))
         else:
             mainLoop.dealerT.draw("Dealer: "+ "~")
+            
     if mainLoop.startMenu == True:
         mainLoop.titleScreen.draw()
-
     if mainLoop.optionMenu == True:
         mainLoop.optionScreen.draw()
     if mainLoop.start == True:
         mainLoop.bettingSys.draw()
 
+    if mainLoop.dealerP.standD == True:
+        mainLoop.newRound.draw()
 
     mainLoop.bettingSys.win()
     pygame.display.flip()
@@ -412,7 +478,8 @@ class mainloop(object):
         self.hitText = []
         self.standText = []
         self.bustText = []
-        self.allstand = []        
+        self.allstand = []
+        self.minBet = []
 
         self.deal = False
         
@@ -420,16 +487,18 @@ class mainloop(object):
         self.cpuThreshold = 16
         self.dealerThreshold = 17
 
-        self.playerHandT = drawText( black, 30, (screenSize[0]/2 - 45, 900), False)
-        self.CPU1T = drawText( black, 30, (screenSize[0]/4 - 45, 900), False)
-        self.CPU2T = drawText( black, 30, (screenSize[0]*0.75 - 45, 900), False)
-        self.dealerT = drawText( black, 30, (screenSize[0]/2 - 45, 460), False)
+        self.colourDealer = black
+        self.colourPlayer = black
+        self.colourCPU1 = black
+        self.colourCPU2 = black
+        
+
         self.minB = drawText( black, 30, (screenSize[0]/2 - 200, 460), True)
         self.bettingSys = betting()
         self.titleScreen = titleScreenF()
         self.optionScreen = optionScreenF()
         self.dealerP = dealerP()
-
+        self.newRound = button((screenSize[0]/2 - (240/2), 300), (240,50), "New Round", (self.resetGame))
         
         self.hitCPU = False
         self.hitP = False
@@ -443,9 +512,40 @@ class mainloop(object):
         self.startMenu = True
         self.optionMenu = False
         self.mouseClick = False
+    def resetGame(self):
+        self.cardsL = []
+        self.playerHand = []
+        self.CPU1Hand = []
+        self.CPU2Hand = []
+        self.dealerHand = []
+        self.hitText = []
+        self.standText = []
+        self.bustText = []
+        self.allstand = []
+        self.minBet = []
+        self.cardSelector = 0
+        self.deal = False
+        self.start = True
+        self.startMenu = False
+        self.hitCPU = False
+        self.hitP = False
+        self.dealerH = False
+        self.standP = False
+        self.reset = False
+        self.up = False
+        self.down = False
+        self.colourDealer = black
+        self.dealerP = dealerP()
+        self.bettingSys = betting()
+        cardShuffle.shuffle()
+        reInit()
     def loop(self):
         global running
         redraw()
+        self.playerHandT = drawText( self.colourPlayer, 30, (screenSize[0]/2 - 45, 900), False)
+        self.CPU1T = drawText( self.colourCPU1, 30, (screenSize[0]/4 - 45, 900), False)
+        self.CPU2T = drawText( self.colourCPU2, 30, (screenSize[0]*0.75 - 45, 900), False)
+        self.dealerT = drawText( self.colourDealer, 30, (screenSize[0]/2 - 45, 460), False)
         clock.tick(60)
         fps = str(int(clock. get_fps()))
         pygame.display.set_caption(fps)
@@ -460,20 +560,21 @@ class mainloop(object):
                     self.bettingSys.bet(10)
                 if event.key == pygame.K_9:
                     self.bettingSys.bet(-10)
+                if event.key == pygame.K_SPACE:
+                    self.resetGame()
 
                 if event.key == pygame.K_h and "1" in self.allstand and "2" in self.allstand:
                     self.hitP = True
 
-                if event.key == pygame.K_s and "1" in self.allstand and "2" in self.allstand:
+                if event.key == pygame.K_s and "1" in self.allstand and "2" in self.allstand and not "3" in self.allstand:
                     self.standP = True
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                self.mouseClick = True
+            
 
-            if keys[pygame.K_SPACE]:
-                if int(self.bettingSys.betA) != 0:
-                    self.deal = True
-                else:
-                    self.minbuy = True
+
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                self.mouseClick = True
+            else:
+                self.mouseClick = False
                 
             
             if keys[pygame.K_r]:
@@ -483,11 +584,19 @@ class mainloop(object):
                 reInit()
                 self.reset = False
 
+        if "1" in self.allstand and "2" in self.allstand and not "3" in self.allstand:
+            self.colourDealer = black
+            self.colourPlayer = red
+            self.colourCPU1 = black
+            self.colourCPU2 = black
+        
+        if "1" in self.allstand and "2" in self.allstand and "3" in self.allstand:
+            self.colourDealer = red
+            self.colourPlayer = black
+            self.colourCPU1 = black
+            self.colourCPU2 = black
 
 
-
-
-                
         if self.deal == True:
             
             for i in self.cardsL:
@@ -519,15 +628,11 @@ class mainloop(object):
                 self.hitCPU = False
 
 def reInit():
-    global mainLoop
     global cardShuffle
     global dealC
     global CPUP
-    global t1
     global dealHide
-    global running
 
-    mainLoop = mainloop()
     dealC = dealCC()
     CPUP = CPUPC()
     cardShuffle.shuffle()
@@ -537,14 +642,10 @@ def reInit():
 
 mainLoop = mainloop()
 cardShuffle = cardShuffleC()
-dealC = dealCC()
-CPUP = CPUPC()
+reInit()
 t1 = threading.Thread(target=delayHit) 
 t1.daemon = True
 t1.start()
-cardShuffle.shuffle()
-dealC.dealF()
-dealHide = pygame.transform.scale(pygame.image.load(FlexyPath + "/Cards/Front/"+ list(cardShuffle.sCards)[6] + ".png").convert_alpha(), (150, 213))
 running = True
 
 while running:
