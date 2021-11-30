@@ -1,5 +1,4 @@
 import pygame
-from pygame import event
 from pygame.locals import *
 import os
 import random
@@ -8,6 +7,7 @@ import threading
 from cards import *
 from text import *
 from time import sleep
+from itertools import islice
 
 pygame.init()
 
@@ -94,10 +94,6 @@ class dealCC(object):
         self.selPlayer = 0
 
     def dealF(self):
-        
-
-        
-
         for i in self.hands:
             cards(screenSize[0]/2, 0, (screenSize[0]*i[1], self.locY))
             i[0].append(cardShuffle.sCards[list(cardShuffle.sCards)[mainLoop.cardSelector]])
@@ -130,16 +126,14 @@ class dealCC(object):
             cards(screenSize[0]/2, 0, (screenSize[0] * ajustment + offsets, 340 - offsets))
             if sum(hand) <= 21:
                 mainLoop.hitText.append(drawText(black, 30, (int(screenSize[0] * ajustment), 100), True))
-            # else:
-            #     bustText.append(drawText(black, 30, (int(screenSize[0] * ajustment), 100), True))
+
         else:
             cards(screenSize[0]/2, 0, (screenSize[0] * ajustment + offsets, 780 - offsets))
             if sum(hand) <= 21:
 
 
                 mainLoop.hitText.append(drawText(black, 30, (int(screenSize[0] * ajustment), 540), True))
-            # else:
-            #     mainLoop.bustText.append(drawText(black, 30, (int(screenSize[0] * ajustment), 540), True))
+
         mainLoop.cardSelector += 1
 
 class betting(object):
@@ -220,10 +214,6 @@ class betting(object):
             self.back.draw()
         self.bankT.draw("Bank: $" + str(bankBalance))
         self.betT.draw("Bet: $" + str(self.betA))
-
-class split():
-    def test():
-        mainLoop.cardsL[0]
 
 class CPUPC(object):
     def __init__(self):
@@ -366,6 +356,29 @@ class button(object):
         pygame.draw.rect(window, self.colour, self.rectangle)
         self.t.draw(self.text)
 
+class stats(object):
+    def __init__(self):
+        self.aceChance = 0
+        self.kingChance = 0
+        
+    def draw(self):
+        self.frequency = {}
+        lst = []
+        for i in islice(cardShuffle.sCards, mainLoop.cardSelector - 1, None):
+            i = i[0]
+            # checking the element in dictionary
+            if i in self.frequency:
+                # incrementing the counr
+                self.frequency[i] += 1
+            else:
+                # initializing the count
+                self.frequency[i] = 1
+        
+        print(self.frequency)
+
+            
+        
+
 def start():
     mainLoop.start = True
     mainLoop.startMenu = False
@@ -386,7 +399,6 @@ def deal():
         mainLoop.deal = True
     else:
         mainLoop.minBet.append(drawText( black, 30, (screenSize[0]/2 - 165, 360), True))
-        mainLoop.minbuy = True
 
 def redraw():
     global event
@@ -450,10 +462,10 @@ def redraw():
         mainLoop.optionScreen.draw()
     if mainLoop.start == True:
         mainLoop.bettingSys.draw()
-
+    mainLoop.stats.draw()
     if mainLoop.dealerP.standD == True:
         mainLoop.newRound.draw()
-
+    
     mainLoop.bettingSys.win()
     pygame.display.flip()
 
@@ -468,8 +480,22 @@ def delayHit():
 
 class mainloop(object):
     global running
+    global state
     def __init__(self):
+        self.cpuThreshold = 16
+        self.dealerThreshold = 17
+        self.minB = drawText( black, 30, (screenSize[0]/2 - 200, 460), True)
+        self.titleScreen = titleScreenF()
+        self.optionScreen = optionScreenF()
+        self.newRound = button((1300, 50), (240,50), "New Round", (self.resetGame))
+        self.optionMenu = False
+        self.mouseClick = False
+        
+        
 
+    def resetGame(self):
+        global state
+        self.stats = stats()
         self.cardsL = []
         self.playerHand = []
         self.CPU1Hand = []
@@ -481,64 +507,28 @@ class mainloop(object):
         self.allstand = []
         self.minBet = []
 
-        self.deal = False
-        
         self.cardSelector = 0
-        self.cpuThreshold = 16
-        self.dealerThreshold = 17
 
         self.colourDealer = black
         self.colourPlayer = black
         self.colourCPU1 = black
         self.colourCPU2 = black
-        
-
-        self.minB = drawText( black, 30, (screenSize[0]/2 - 200, 460), True)
+              
         self.bettingSys = betting()
-        self.titleScreen = titleScreenF()
-        self.optionScreen = optionScreenF()
         self.dealerP = dealerP()
-        self.newRound = button((screenSize[0]/2 - (240/2), 300), (240,50), "New Round", (self.resetGame))
         
-        self.hitCPU = False
-        self.hitP = False
-        self.dealerH = False
-        self.standP = False
-        self.reset = False
-        self.up = False
-        self.down = False
-        self.minbuy = False
-        self.start = False
-        self.startMenu = True
-        self.optionMenu = False
-        self.mouseClick = False
-    def resetGame(self):
-        self.cardsL = []
-        self.playerHand = []
-        self.CPU1Hand = []
-        self.CPU2Hand = []
-        self.dealerHand = []
-        self.hitText = []
-        self.standText = []
-        self.bustText = []
-        self.allstand = []
-        self.minBet = []
-        self.cardSelector = 0
         self.deal = False
-        self.start = True
-        self.startMenu = False
         self.hitCPU = False
         self.hitP = False
         self.dealerH = False
         self.standP = False
         self.reset = False
-        self.up = False
-        self.down = False
-        self.colourDealer = black
-        self.dealerP = dealerP()
-        self.bettingSys = betting()
-        cardShuffle.shuffle()
-        reInit()
+        self.startMenu = False
+        self.start = True
+        if state == True:
+            reInit()
+        state = True
+       
     def loop(self):
         global running
         redraw()
@@ -560,8 +550,7 @@ class mainloop(object):
                     self.bettingSys.bet(10)
                 if event.key == pygame.K_9:
                     self.bettingSys.bet(-10)
-                if event.key == pygame.K_SPACE:
-                    self.resetGame()
+
 
                 if event.key == pygame.K_h and "1" in self.allstand and "2" in self.allstand:
                     self.hitP = True
@@ -639,8 +628,13 @@ def reInit():
     dealC.dealF()
     dealHide = pygame.transform.scale(pygame.image.load(FlexyPath + "/Cards/Front/"+ list(cardShuffle.sCards)[6] + ".png").convert_alpha(), (150, 213))
 
-
+state = False
 mainLoop = mainloop()
+
+mainLoop.resetGame()
+mainLoop.startMenu = True
+mainLoop.start = False
+
 cardShuffle = cardShuffleC()
 reInit()
 t1 = threading.Thread(target=delayHit) 
