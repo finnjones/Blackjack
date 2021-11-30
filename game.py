@@ -247,8 +247,8 @@ class titleScreenF(object):
     def __init__(self):
         self.title = drawText(black, 100, (10, 0), False)
         self.owner = drawText(black, 50, (15, 100), False)
-        self.startB = button(screenSize[0]/2 - (240/2), 300, "Start", start)
-        self.optionsB = button(screenSize[0]/2 - (240/2), 400, "Options", options)
+        self.startB = button((screenSize[0]/2 - (240/2), 300), (240,50), "Start", start)
+        self.optionsB = button((screenSize[0]/2 - (240/2), 400), (240,50), "Options", options)
 
     def draw(self):
         self.title.draw("Blackjack")
@@ -259,42 +259,61 @@ class titleScreenF(object):
 class optionScreenF(object):
     def __init__(self):
         self.title = drawText(black, 100, (10, 0), False)
+        self.addCpuT = button((screenSize[0]/2 - (50/2) - 100, 300), (50,50), "-", (optionScreenF.cpuM))
+        self.munusCpuT = button((screenSize[0]/2 - (50/2) + 100, 300), (50,50), "+", (optionScreenF.cpuA))
+        self.addDealerT = button((screenSize[0]/2 - (50/2) - 100, 400), (50,50), "-", (optionScreenF.cpuM))
+        self.munusDealerT = button((screenSize[0]/2 - (50/2) + 100, 400), (50,50), "+", (optionScreenF.cpuA))
+        self.cpuThreshT = drawText(black, 40, (screenSize[0]/2 - (40/2), 300, 0), False)
+        self.CPUTile = drawText(black, 40, (screenSize[0]/2 - 140, 200, 0), False)
+        
+
+    
     def draw(self):
         self.title.draw("Options")
-
+        self.CPUTile.draw("CPU Threshold")
+        self.cpuThreshT.draw(str(mainLoop.cpuThreshold))
+        self.addCpuT.draw()
+        self.munusCpuT.draw()
+        self.addDealerT.draw()
+        self.munusDealerT.draw()
+        
+    def cpuM():
+        if mainLoop.cpuThreshold > 0 :
+            mainLoop.cpuThreshold -= 1
+    def cpuA():
+        if mainLoop.cpuThreshold <= 21:
+            mainLoop.cpuThreshold += 1
+def test():
+    print("test")
 class button(object):
-    def __init__(self, x, y, text, function):
-        self.x = x
-        self.y = y
+    def __init__(self, loc, size, text, function):
+        self.loc = loc
+        self.size = size
+        self.x = self.loc[0]
+        self.y = self.loc[1]
         self.text = text
         self.function = function
         self.font = pygame.font.Font(FlexyPath + '/font/quicksand.ttf', 40)
         self.textSize = self.font.size(self.text)
-        self.rectangle = pygame.Rect(self.x,self.y,240,50)
-        self.t = drawText(black, 40, ((self.x + 240/2) - self.textSize[0]/2, (self.y + 50/2) - self.textSize[1]/2), False)
+        self.rectangle = pygame.Rect(self.x,self.y,size[0],size[1])
+        self.t = drawText(black, 40, ((self.x + self.size[0]/2) - self.textSize[0]/2, (self.y + self.size[1]/2) - self.textSize[1]/2), False)
     def draw(self):
         self.colour = lightGrey
-        
         if self.rectangle.collidepoint(pygame.mouse.get_pos()):
-            
-            if pygame.mouse.get_pressed()[0]:
+            if mainLoop.mouseClick == True:
                 self.colour = black
                 pygame.draw.rect(window, self.colour, self.rectangle)
                 self.t.draw(self.text)
                 self.function()
-                # if self.text == "Start":
-                #     mainLoop.start = True
-                # return self.text
-
+                mainLoop.mouseClick = False
             else:
                 self.colour = grey
-
+            
 
  
         pygame.draw.rect(window, self.colour, self.rectangle)
         self.t.draw(self.text)
 
-        # showText(self.text, 40, (self.x + (120 - self.font.size(self.text)[0]/2), self.y + 5), black)   
    
 def start():
     mainLoop.start = True
@@ -423,6 +442,7 @@ class mainloop(object):
         self.start = False
         self.startMenu = True
         self.optionMenu = False
+        self.mouseClick = False
     def loop(self):
         global running
         redraw()
@@ -446,7 +466,9 @@ class mainloop(object):
 
                 if event.key == pygame.K_s and "1" in self.allstand and "2" in self.allstand:
                     self.standP = True
-        
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                self.mouseClick = True
+
             if keys[pygame.K_SPACE]:
                 if int(self.bettingSys.betA) != 0:
                     self.deal = True
