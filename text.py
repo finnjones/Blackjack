@@ -12,7 +12,7 @@ class drawText(object):
         self.loc = loc
         self.font = pygame.font.Font(FlexyPath + '/font/quicksand.ttf', self.size)
         self.counter = 290
-        
+        self.text = ""
 
     def draw(self, text):
         self.x = self.loc[0]

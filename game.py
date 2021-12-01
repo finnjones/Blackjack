@@ -24,8 +24,9 @@ clock = pygame.time.Clock()
 vec = pygame.math.Vector2
 FlexyPath = os.path.dirname(os.path.abspath(__file__))
 screenSize = (1620 , 1000)
+flags = DOUBLEBUF
 
-window = pygame.display.set_mode(screenSize)
+window = pygame.display.set_mode(screenSize, flags)
 
 bankBalance = 1000
 
@@ -360,22 +361,34 @@ class stats(object):
     def __init__(self):
         self.aceChance = 0
         self.kingChance = 0
-        
+        self.textL = []
+
     def draw(self):
         self.frequency = {}
+        self.textL = []
         lst = []
+        statsList = []
+
+        counter = -1
         for i in islice(cardShuffle.sCards, mainLoop.cardSelector - 1, None):
             i = i[0]
-            # checking the element in dictionary
+            lst.append(i)
             if i in self.frequency:
-                # incrementing the counr
                 self.frequency[i] += 1
             else:
-                # initializing the count
                 self.frequency[i] = 1
-        
-        print(self.frequency)
+        for i in self.frequency:
+            counter += 50
+            self.textL.append(drawText(black, 20, (1300, 0 + counter), False))
 
+        new = sorted(self.frequency.items())
+        counter = -1
+        for i in self.textL:
+            counter = counter + 1
+            statsList.append([(new[counter])[0],str(round((new[counter])[1]/len(lst) * 100))+"%"])
+            i.draw("Card: "+str(statsList[counter][0]) + " Probability: " +str(statsList[counter][1]))
+
+            
             
         
 
@@ -462,7 +475,8 @@ def redraw():
         mainLoop.optionScreen.draw()
     if mainLoop.start == True:
         mainLoop.bettingSys.draw()
-    mainLoop.stats.draw()
+    if mainLoop.cheating == True:
+        mainLoop.stats.draw()
     if mainLoop.dealerP.standD == True:
         mainLoop.newRound.draw()
     
@@ -525,6 +539,7 @@ class mainloop(object):
         self.reset = False
         self.startMenu = False
         self.start = True
+        self.cheating = False
         if state == True:
             reInit()
         state = True
@@ -546,10 +561,6 @@ class mainloop(object):
                 running = False
             
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_0:
-                    self.bettingSys.bet(10)
-                if event.key == pygame.K_9:
-                    self.bettingSys.bet(-10)
 
 
                 if event.key == pygame.K_h and "1" in self.allstand and "2" in self.allstand:
@@ -558,6 +569,11 @@ class mainloop(object):
                 if event.key == pygame.K_s and "1" in self.allstand and "2" in self.allstand and not "3" in self.allstand:
                     self.standP = True
             
+                if event.key == pygame.K_p:
+                    if self.cheating == False:
+                        self.cheating = True
+                    else:
+                        self.cheating = False
 
 
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -565,13 +581,7 @@ class mainloop(object):
             else:
                 self.mouseClick = False
                 
-            
-            if keys[pygame.K_r]:
-                self.reset = True
-            
-            if self.reset == True:
-                reInit()
-                self.reset = False
+ 
 
         if "1" in self.allstand and "2" in self.allstand and not "3" in self.allstand:
             self.colourDealer = black
@@ -591,8 +601,6 @@ class mainloop(object):
             for i in self.cardsL:
                 i.slideCards()
 
-
-            
             if self.standP == True:
                 self.allstand.append("3")
                 self.standText.append(drawText(black, 30, (int(screenSize[0]/2 - 20), 540), True))
@@ -611,9 +619,10 @@ class mainloop(object):
             if self.hitCPU == True:
                 if "3" in self.allstand and "1" in self.allstand and "2" in self.allstand:
                     self.dealerP.play()
+
                 elif not "2" in self.allstand:
-                    
                     CPUP.play()
+
                 self.hitCPU = False
 
 def reInit():
