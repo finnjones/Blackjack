@@ -28,7 +28,7 @@ flags = DOUBLEBUF
 
 window = pygame.display.set_mode(screenSize, flags)
 
-bankBalance = 1000
+bankBalance = 10
 
 class cards(object):
     global hitCPU
@@ -143,7 +143,7 @@ class betting(object):
     def __init__(self):
 
         self.bankT = drawText(black, 50, (screenSize[0]/2 - 140, 100), False)
-        self.betT = drawText(black, 30, (screenSize[0]/2 - 50, 260), False)
+        self.betT = drawText(black, 30, (screenSize[0]/2 - 55, 260), False)
         self.addCpuT = button((screenSize[0]/2 - (50/2) - 100, 260), (50,50), "-", (betting.betM))
         self.minusCpuT = button((screenSize[0]/2 - (50/2) + 100, 260), (50,50), "+", (betting.betA))
         self.back = button((screenSize[0]/2 - (250/2), 500), (240,50), "Back", (backF))
@@ -151,7 +151,7 @@ class betting(object):
         self.deal = button((screenSize[0]/2 - (250/2), 400), (240,50), "Deal", (deal))
 
         self.title = drawText(black, 100, (10, 0), False)
-        self.bankBalance = bankBalance
+
         self.betA = 0
         self.stop = False
 
@@ -159,7 +159,8 @@ class betting(object):
         global bankBalance
 
         self.size = size
-        if (self.betA + self.size) >= 0 and self.bankBalance - (self.size + self.betA) >= 0:
+
+        if (self.betA + self.size) >= 0 and bankBalance > 0:
             self.betA += self.size
             bankBalance -= self.size
 
@@ -196,7 +197,6 @@ class betting(object):
                     bankBalance += self.betA
                     self.betA = 0
                     self.stop = True
-        print(mainLoop.allstand)
 
 
 
@@ -207,7 +207,7 @@ class betting(object):
             self.betT = drawText(black, 30, (100, 100), False)
         else:
             self.bankT = drawText(black, 50, (screenSize[0]/2 - 140, 100), False)
-            self.betT = drawText(black, 30, (screenSize[0]/2 - 50, 260), False)
+            self.betT = drawText(black, 30, (screenSize[0]/2 - 73, 265), False)
             self.title.draw("Betting")
             self.deal.draw()
             self.addCpuT.draw()
@@ -281,12 +281,14 @@ class titleScreenF(object):
         self.owner = drawText(black, 50, (15, 100), False)
         self.startB = button((screenSize[0]/2 - (240/2), 300), (240,50), "Start", start)
         self.optionsB = button((screenSize[0]/2 - (240/2), 400), (240,50), "Options", options)
+        self.quitB = button((screenSize[0]/2 - (240/2), 500), (240,50), "Quit", quit)
 
     def draw(self):
         self.title.draw("Blackjack")
         self.owner.draw("By Finn Jones")
         self.startB.draw()
         self.optionsB.draw()
+        self.quitB.draw()
 
 class optionScreenF(object):
     def __init__(self):
@@ -371,7 +373,12 @@ class stats(object):
 
         counter = -1
         for i in islice(cardShuffle.sCards, mainLoop.cardSelector - 1, None):
-            i = i[0]
+            if len(i) == 2:
+                i = i[0]
+            else:
+                i = i[:2]
+
+            
             lst.append(i)
             if i in self.frequency:
                 self.frequency[i] += 1
@@ -379,13 +386,14 @@ class stats(object):
                 self.frequency[i] = 1
         for i in self.frequency:
             counter += 50
-            self.textL.append(drawText(black, 20, (1300, 0 + counter), False))
+            self.textL.append(drawText(black, 20, (1350, 0 + counter), False))
 
         new = sorted(self.frequency.items())
         counter = -1
         for i in self.textL:
             counter = counter + 1
-            statsList.append([(new[counter])[0],str(round((new[counter])[1]/len(lst) * 100))+"%"])
+            print(len(lst)-1)
+            statsList.append([(new[counter])[0],str(round((new[counter])[1]/(len(lst)-1) * 100))+"%"])
             i.draw("Card: "+str(statsList[counter][0]) + " Probability: " +str(statsList[counter][1]))
 
             
@@ -401,7 +409,9 @@ def options():
     mainLoop.startMenu = False
     mainLoop.optionMenu = True
     print("options")
-
+def quit():
+    global running
+    running = False
 def backF():
     mainLoop.start = False
     mainLoop.startMenu = True
@@ -415,7 +425,7 @@ def deal():
 
 def redraw():
     global event
-
+    global bankBalance
     counter = 0
     window.fill(green)
     if mainLoop.deal == True:
@@ -479,13 +489,19 @@ def redraw():
         mainLoop.stats.draw()
     if mainLoop.dealerP.standD == True:
         mainLoop.newRound.draw()
-    
+    if bankBalance <= 0 and mainLoop.bettingSys.betA <= 0:
+        mainLoop.gameOver.draw()
+        
+
+
     mainLoop.bettingSys.win()
+
     pygame.display.flip()
 
 def delayHit():
     global hitCPU
     global dealerH
+    # global bankBalance
     while True:
         if mainLoop.deal == True:
             sleep(1)
@@ -495,6 +511,7 @@ def delayHit():
 class mainloop(object):
     global running
     global state
+    global bankBalance
     def __init__(self):
         self.cpuThreshold = 16
         self.dealerThreshold = 17
@@ -502,6 +519,7 @@ class mainloop(object):
         self.titleScreen = titleScreenF()
         self.optionScreen = optionScreenF()
         self.newRound = button((1300, 50), (240,50), "New Round", (self.resetGame))
+        self.gameOver = button((1300, 50), (240,50), "Game Over", (self.resetGame))
         self.optionMenu = False
         self.mouseClick = False
         
@@ -509,6 +527,7 @@ class mainloop(object):
 
     def resetGame(self):
         global state
+        global bankBalance
         self.stats = stats()
         self.cardsL = []
         self.playerHand = []
@@ -540,6 +559,11 @@ class mainloop(object):
         self.startMenu = False
         self.start = True
         self.cheating = False
+        if bankBalance <= 0 and mainLoop.bettingSys.betA <= 0:
+            bankBalance = 1000
+            self.startMenu = True
+            self.start = False
+
         if state == True:
             reInit()
         state = True
@@ -574,6 +598,8 @@ class mainloop(object):
                         self.cheating = True
                     else:
                         self.cheating = False
+                if event.key == pygame.K_n and self.dealerP.standD:
+                    self.resetGame()
 
 
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -626,6 +652,7 @@ class mainloop(object):
                 self.hitCPU = False
 
 def reInit():
+    global bankBalance
     global cardShuffle
     global dealC
     global CPUP
