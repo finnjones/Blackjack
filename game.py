@@ -261,7 +261,7 @@ class dealerP(object):
         global standD
         players = [sum(mainLoop.CPU1Hand), sum(mainLoop.CPU2Hand), sum(mainLoop.playerHand)]
         players.sort()
-        if sum(mainLoop.dealerHand) < mainLoop.dealerThreshold:
+        if sum(mainLoop.dealerHand) < mainLoop.dealerThreshold and sum(mainLoop.playerHand) <= 21:
             dealC.hit(mainLoop.dealerHand)
             mainLoop.colourDealer = red
             mainLoop.colourPlayer = black
