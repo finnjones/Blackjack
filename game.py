@@ -28,7 +28,7 @@ flags = DOUBLEBUF
 
 window = pygame.display.set_mode(screenSize, flags)
 
-bankBalance = 10
+bankBalance = 1000
 
 class cards(object):
     global hitCPU
@@ -160,7 +160,7 @@ class betting(object):
 
         self.size = size
 
-        if (self.betA + self.size) >= 0 and bankBalance > 0:
+        if (self.betA + self.size) >= 0 and bankBalance - self.size >= 0:
             self.betA += self.size
             bankBalance -= self.size
 
