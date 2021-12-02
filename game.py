@@ -171,34 +171,39 @@ class betting(object):
     def betM():
         mainLoop.bettingSys.bet(-10)
 
-
     def win(self):
         global mainLoop
         global bankBalance
-        
+        allHands = [[mainLoop.CPU1Hand, 0.25], [mainLoop.CPU2Hand, 0.75], [mainLoop.playerHand, 0.5]]
         if self.stop == False:
             if "3" in mainLoop.allstand and "1" in mainLoop.allstand and "2" in mainLoop.allstand and "4" in mainLoop.allstand:
-                if sum(mainLoop.playerHand) > 21 or sum(mainLoop.playerHand) < sum(mainLoop.dealerHand) and sum(mainLoop.dealerHand) <= 21:
-                    self.betA = 0
-                    self.stop = True
-
-                elif sum(mainLoop.playerHand) > sum(mainLoop.dealerHand) or sum(mainLoop.dealerHand) > 21:
-                    if sum(mainLoop.playerHand) == 21:
-                        bankBalance = bankBalance + (self.betA * 3)
-                        self.betA = 0
-                        self.stop = True
-                    else:
-                        bankBalance = self.betA * 2 + bankBalance
-                        self.betA = 0
+                for i in allHands:
+                    
+                    if sum(i[0]) > 21 or sum(i[0]) < sum(mainLoop.dealerHand) and sum(mainLoop.dealerHand) <= 21:
+                        if i[0] == mainLoop.playerHand:
+                            self.betA = 0
+                        mainLoop.lossText.append(drawText(black, 30, (int(screenSize[0]* i[1]), 540), True))
                         self.stop = True
 
-           
+                    elif sum(mainLoop.playerHand) > sum(mainLoop.dealerHand) or sum(mainLoop.dealerHand) > 21:
+                        if i[0] == mainLoop.playerHand:
+                            if sum(mainLoop.playerHand) == 21:
+                                bankBalance = bankBalance + (self.betA * 3)
+                                self.betA = 0
+                            else:
+                                bankBalance = self.betA * 2 + bankBalance
+                                self.betA = 0
+                                
+                        mainLoop.winText.append(drawText(black, 30, (int(screenSize[0]* i[1]), 540), True))
+                        self.stop = True
+            
 
-                elif sum(mainLoop.playerHand) == sum(mainLoop.dealerHand):
-                    bankBalance += self.betA
-                    self.betA = 0
-                    self.stop = True
-
+                    elif sum(mainLoop.playerHand) == sum(mainLoop.dealerHand):
+                        if i[0] == mainLoop.playerHand:
+                            bankBalance += self.betA
+                            self.betA = 0
+                            
+                        self.stop = True
 
 
 
@@ -393,7 +398,6 @@ class stats(object):
         counter = -1
         for i in self.textL:
             counter = counter + 1
-            print(len(lst)-1)
             statsList.append([(new[counter])[0],str(round((new[counter])[1]/(len(lst)-1) * 100))+"%"])
             i.draw("Card: "+str(statsList[counter][0]) + " Probability: " +str(statsList[counter][1]))
 
@@ -404,15 +408,15 @@ class stats(object):
 def start():
     mainLoop.start = True
     mainLoop.startMenu = False
-    print("start")
 
 def options():
     mainLoop.startMenu = False
     mainLoop.optionMenu = True
-    print("options")
+
 def quit():
     global running
     running = False
+
 def backF():
     mainLoop.start = False
     mainLoop.startMenu = True
@@ -458,7 +462,7 @@ def redraw():
                 else:
                     mainLoop.bustText.append(drawText(black, 30, (int(screenSize[0]* i[1]), 100), True))
                     mainLoop.allstand.append(str(counter))
-         
+
     if mainLoop.deal == True:
         for i in mainLoop.standText:
             i.draw("Stand")
@@ -466,6 +470,16 @@ def redraw():
             i.draw("Hit")
         for i in mainLoop.bustText:
             i.draw("Bust")
+        for i in mainLoop.winText:
+            i.draw("Win")
+            if i.counter <= 1:
+                i.counter = 290
+                i.loc = (i.loc[0], 540)
+        for i in mainLoop.lossText:
+            i.draw("Loss")
+            if i.counter <= 1:
+                i.counter = 290
+                i.loc = (i.loc[0], 540)
 
     for i in mainLoop.minBet:
         i.draw("Minimum Buy In Of $10")
@@ -502,7 +516,7 @@ def redraw():
 def delayHit():
     global hitCPU
     global dealerH
-    # global bankBalance
+
     while True:
         if mainLoop.deal == True:
             sleep(1)
@@ -538,6 +552,8 @@ class mainloop(object):
         self.hitText = []
         self.standText = []
         self.bustText = []
+        self.winText = []
+        self.lossText = []
         self.allstand = []
         self.minBet = []
 
@@ -667,11 +683,9 @@ def reInit():
 
 state = False
 mainLoop = mainloop()
-
 mainLoop.resetGame()
 mainLoop.startMenu = True
 mainLoop.start = False
-
 cardShuffle = cardShuffleC()
 reInit()
 t1 = threading.Thread(target=delayHit) 

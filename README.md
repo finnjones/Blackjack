@@ -36,3 +36,7 @@
 
     pyinstaller --onefile --windowed main.py game.py cards.py text.py --add-data "font:font" --add-data "Cards:Cards" --icon "blackjack.icns" --name "Blackjack"
 	
+
+## Theory Work
+
+https://soft-felidae-860.notion.site/Blackjack-Game-Theory-9b09830b6372453b9a73084a040f4969

@@ -21,7 +21,7 @@ class drawText(object):
 
         self.textF = self.font.render(self.text, True, self.colour)
         if self.fade == True:
-            self.counter = self.counter * 0.85
+            self.counter = self.counter * 0.90
             self.textF.set_alpha(self.counter)
             self.y -= 1
             
