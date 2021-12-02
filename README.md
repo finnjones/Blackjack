@@ -21,3 +21,5 @@
 - Hit Stand and Bust indicators
 - Betting functionality (If you get blackjack player triples their money all other wins are double)
 
+.. code:: sh
+	pyinstaller --onefile --windowed main.py game.py cards.py text.py --add-data "font;font" --add-data "Cards;Cards"

@@ -2,6 +2,7 @@ import pygame
 from pygame.locals import *
 import os
 import random
+import sys
 import math
 import threading
 from cards import *
@@ -682,3 +683,4 @@ while running:
     mainLoop.loop()
     
 pygame.quit()
+sys.exit()
