@@ -9,7 +9,7 @@
 |--|--|
 |Hit|H|
 |Stand|S|
-|New Round|N or use button|
+|New Round|N or use GUI button|
 |Card Counting|P|
 
 (Please note card counting is only avalable when in a game and new round button only functions once a round is completed)
