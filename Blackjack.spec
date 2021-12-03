@@ -37,8 +37,4 @@ exe = EXE(pyz,
           disable_windowed_traceback=False,
           target_arch=None,
           codesign_identity=None,
-          entitlements_file=None , icon='blackjack.icns')
-app = BUNDLE(exe,
-             name='Blackjack.app',
-             icon='blackjack.icns',
-             bundle_identifier=None)
+          entitlements_file=None , icon='blackjack.ico')
