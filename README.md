@@ -38,6 +38,8 @@
 
     pyinstaller --onefile --windowed main.py game.py cards.py text.py --add-data "font:font" --add-data "Cards:Cards" --icon "blackjack.icns" --name "Blackjack"
 	
+## OR
+Use precompiled program in the folder "Standalone Programs"
 
 ## Theory Work
 
