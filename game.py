@@ -42,7 +42,7 @@ class cards(object):
         self.rFriction = 0.55
         self.pos = pos
         self.rot = 0
-        if mainLoop.cardSelector == 8:
+        if mainLoop.cardSelector == 10:
             self.card = pygame.transform.scale(pygame.image.load(FlexyPath + "/Cards/Back/Blue.png").convert_alpha(), (150, 213))
         else:
             self.card = pygame.transform.scale(pygame.image.load(FlexyPath + "/Cards/Front/" + list(cardShuffle.sCards)[mainLoop.cardSelector] + ".png").convert_alpha(), (150, 213))
@@ -89,7 +89,7 @@ class cards(object):
 class dealCC(object):
     
     def __init__(self):
-        self.hands = [[mainLoop.playerHand, 0.5], [mainLoop.CPU1Hand, 0.0625], [mainLoop.CPU2Hand, 0.75], [mainLoop.CPU3Hand, 0.25]]
+        self.hands = [[mainLoop.playerHand, 0.5], [mainLoop.CPU1Hand, 0.1], [mainLoop.CPU2Hand, 0.75], [mainLoop.CPU3Hand, 0.25], [mainLoop.CPU4Hand, 0.9]]
         self.locY = 780
         
         self.CPUS = [mainLoop.CPU1Hand, mainLoop.CPU2Hand]
@@ -174,9 +174,13 @@ class betting(object):
     def win(self):
         global mainLoop
         global bankBalance
-        allHands = [[mainLoop.playerHand, 0.5], [mainLoop.CPU1Hand, 0.0625], [mainLoop.CPU2Hand, 0.75], [mainLoop.CPU3Hand, 0.25]]
+        
+        allHands = [[mainLoop.playerHand, 0.5], [mainLoop.CPU1Hand, 0.1], [mainLoop.CPU2Hand, 0.75], [mainLoop.CPU3Hand, 0.25], [mainLoop.CPU4Hand, 0.9]]
         if self.stop == False:
-            if "3" in mainLoop.allstand and "1" in mainLoop.allstand and "2" in mainLoop.allstand and "4" in mainLoop.allstand:
+            # for i in range(1,6):
+                
+            if "1" in mainLoop.allstand and "2" in mainLoop.allstand and "3" in mainLoop.allstand and "4" in mainLoop.allstand and "5" in mainLoop.allstand and "6" in mainLoop.allstand:
+        
                 for i in allHands:
                     
                     if sum(i[0]) > 21 or sum(i[0]) < sum(mainLoop.dealerHand) and sum(mainLoop.dealerHand) <= 21:
@@ -224,8 +228,10 @@ class betting(object):
 
 class CPUPC(object):
     def __init__(self):
-        self.CPUS = [mainLoop.CPU1Hand, mainLoop.CPU2Hand, mainLoop.CPU3Hand]
+        self.CPUS = [mainLoop.CPU1Hand, mainLoop.CPU2Hand, mainLoop.CPU3Hand, mainLoop.CPU4Hand]
+        self.allHands = [[mainLoop.CPU1Hand, 0.1], [mainLoop.CPU2Hand, 0.75], [mainLoop.CPU3Hand, 0.25], [mainLoop.CPU4Hand, 0.9]]
         self.selPlayer = 0
+        self.counter = 0
         
     def play(self):
 
@@ -234,25 +240,40 @@ class CPUPC(object):
             dealC.hit(self.CPUS[self.selPlayer])
 
         else:
-            if len(mainLoop.standText) <= 2:
-                if mainLoop.CPU1Hand == self.CPUS[self.selPlayer]:
-                    if sum(mainLoop.CPU1Hand) <= 21:
-                        mainLoop.standText.append(drawText(black, 30, (int(screenSize[0]* 0.25), 540), True))
-                        mainLoop.allstand.append("1")
+            print(len(mainLoop.standText))
+            if len(mainLoop.standText) <= 4:
+                # for i in self.allHands:
+                #     self.counter += 1
+                #     if mainLoop.CPU1Hand == self.CPUS[self.selPlayer]:
+                #         if sum(i[0]) <= 21:
+                #             mainLoop.standText.append(drawText(black, 30, (int(screenSize[0]* i[1]), 540), True))
+                #             mainLoop.allstand.append(str(self.counter))
 
-                if mainLoop.CPU2Hand == self.CPUS[self.selPlayer]:
-                    if sum(mainLoop.CPU2Hand) <= 21:
-                        mainLoop.standText.append(drawText(black, 30, (int(screenSize[0]* 0.75), 540), True))
-                        mainLoop.allstand.append("2")
-                if mainLoop.CPU3Hand == self.CPUS[self.selPlayer]:
-                    if sum(mainLoop.CPU2Hand) <= 21:
-                        mainLoop.standText.append(drawText(black, 30, (int(screenSize[0]* 0.75), 540), True))
-                        mainLoop.allstand.append("3")
-                # if mainLoop.CPU4Hand == self.CPUS[self.selPlayer]:
+
+                # if mainLoop.CPU1Hand == self.CPUS[self.selPlayer]:
+
+                if sum((self.allHands[self.selPlayer])[0]) <= 21:
+                    mainLoop.standText.append(drawText(black, 30, (int(screenSize[0]* (self.allHands[self.selPlayer])[1]), 540), True))
+                    mainLoop.allstand.append(str(self.selPlayer + 1))
+
+                # if mainLoop.CPU1Hand == self.CPUS[self.selPlayer]:
+                #     if sum(mainLoop.CPU1Hand) <= 21:
+                #         mainLoop.standText.append(drawText(black, 30, (int(screenSize[0]* 0.25), 540), True))
+                #         mainLoop.allstand.append("1")
+
+                # if mainLoop.CPU2Hand == self.CPUS[self.selPlayer]:
                 #     if sum(mainLoop.CPU2Hand) <= 21:
                 #         mainLoop.standText.append(drawText(black, 30, (int(screenSize[0]* 0.75), 540), True))
+                #         mainLoop.allstand.append("2")
+                # if mainLoop.CPU3Hand == self.CPUS[self.selPlayer]:
+                #     if sum(mainLoop.CPU3Hand) <= 21:
+                #         mainLoop.standText.append(drawText(black, 30, (int(screenSize[0]* 0.1), 540), True))
+                #         mainLoop.allstand.append("3")
+                # if mainLoop.CPU4Hand == self.CPUS[self.selPlayer]:
+                #     if sum(mainLoop.CPU2Hand) <= 21:
+                #         mainLoop.standText.append(drawText(black, 30, (int(screenSize[0]* 0.9), 540), True))
                 #         mainLoop.allstand.append("4")
-            
+            print(self.selPlayer)
             if self.selPlayer + 1 < len(self.CPUS):
                 self.selPlayer += 1
     def update(self):
@@ -272,21 +293,22 @@ class dealerP(object):
         self.standD = False
     def play(self):
         global standD
-        players = [sum(mainLoop.CPU1Hand), sum(mainLoop.CPU2Hand), sum(mainLoop.playerHand), sum(mainLoop.CPU3Hand)]
+        players = [sum(mainLoop.CPU1Hand), sum(mainLoop.CPU2Hand), sum(mainLoop.playerHand), sum(mainLoop.CPU3Hand), sum(mainLoop.CPU4Hand)]
         players.sort()
-        if sum(mainLoop.dealerHand) < mainLoop.dealerThreshold and sum(mainLoop.playerHand) <= 21:
-            dealC.hit(mainLoop.dealerHand)
-            mainLoop.colourDealer = red
-            mainLoop.colourPlayer = black
-            mainLoop.colourCPU1 = black
-            mainLoop.colourCPU2 = black
-        
-        elif self.standD == False:
+        for i in players:
+            if sum(mainLoop.dealerHand) < mainLoop.dealerThreshold and i <= 21:
+                dealC.hit(mainLoop.dealerHand)
+                # mainLoop.colourDealer = red
+                # mainLoop.colourPlayer = black
+                # mainLoop.colourCPU1 = black
+                # mainLoop.colourCPU2 = black
             
-            self.standD = True
-            if not "6" in mainLoop.allstand:
-                mainLoop.standText.append(drawText(black, 30, (int(screenSize[0]/2), 100), True))
-                mainLoop.allstand.append("6")
+            elif self.standD == False:
+                
+                self.standD = True
+                if not "6" in mainLoop.allstand:
+                    mainLoop.standText.append(drawText(black, 30, (int(screenSize[0]/2), 100), True))
+                    mainLoop.allstand.append("6")
 
 class titleScreenF(object):
     def __init__(self):
@@ -441,66 +463,70 @@ def redraw():
     counter = 0
     window.fill(green)
     if mainLoop.deal == True:
+        allHands = [[mainLoop.playerHand, 0.5], [mainLoop.CPU1Hand, 0.1], [mainLoop.CPU2Hand, 0.75], [mainLoop.CPU3Hand, 0.25], [mainLoop.CPU4Hand, 0.9], [mainLoop.dealerHand, 0.5]]
+
         for i in mainLoop.cardsL:
             i.draw(1)
-            if mainLoop.cardsL[8] == i:
+            if mainLoop.cardsL[10] == i:
                 if "3" in mainLoop.allstand and "1" in mainLoop.allstand and "2" in mainLoop.allstand and "5" in mainLoop.allstand:
                     window.blit(dealHide, (screenSize[0]/2 - 75, 234))
 
-    allHands = [[mainLoop.CPU1Hand, 0.0625], [mainLoop.CPU2Hand, 0.75], [mainLoop.CPU3Hand, 0.25], [mainLoop.playerHand, 0.5], [mainLoop.dealerHand, 0.5]]
+        
 
-    for i in allHands:
-        counter += 1
+        for i in allHands:
+            counter += 1
 
-        if sum(i[0]) > 21:
-            if 11 in i[0]:
-                for l in i[0]:
-                    if l == 11:
-                        i[0].remove(11)
-                        i[0].append(1)
+            if sum(i[0]) > 21:
+                if 11 in i[0]:
+                    for l in i[0]:
+                        if l == 11:
+                            i[0].remove(11)
+                            i[0].append(1)
 
-            
-            elif not str(counter) in mainLoop.allstand:
+                
+                elif not str(counter) in mainLoop.allstand:
 
-                if i[0] != mainLoop.dealerHand:
-                    mainLoop.bustText.append(drawText(black, 30, (int(screenSize[0]* i[1]), 540), True))
-                    mainLoop.allstand.append(str(counter))
+                    if i[0] != mainLoop.dealerHand:
+                        mainLoop.bustText.append(drawText(black, 30, (int(screenSize[0]* i[1]), 540), True))
+                        mainLoop.allstand.append(str(counter))
 
-                else:
-                    mainLoop.bustText.append(drawText(black, 30, (int(screenSize[0]* i[1]), 100), True))
-                    mainLoop.allstand.append(str(counter))
+                    else:
+                        mainLoop.bustText.append(drawText(black, 30, (int(screenSize[0]* i[1]), 100), True))
+                        mainLoop.allstand.append(str(counter))
 
-    if mainLoop.deal == True:
-        for i in mainLoop.standText:
-            i.draw("Stand")
-        for i in mainLoop.hitText:
-            i.draw("Hit")
-        for i in mainLoop.bustText:
-            i.draw("Bust")
-        for i in mainLoop.winText:
-            i.draw("Win")
-            if i.counter <= 1:
-                i.counter = 290
-                i.loc = (i.loc[0], 540)
-        for i in mainLoop.lossText:
-            i.draw("Loss")
-            if i.counter <= 1:
-                i.counter = 290
-                i.loc = (i.loc[0], 540)
-
-    for i in mainLoop.minBet:
-        i.draw("Minimum Buy In Of $10")
-
-    CPUP.update()
-    if mainLoop.deal == True:
+        if mainLoop.deal == True:
+            for i in mainLoop.standText:
+                i.draw("Stand")
+            for i in mainLoop.hitText:
+                i.draw("Hit")
+            for i in mainLoop.bustText:
+                i.draw("Bust")
+            for i in mainLoop.winText:
+                i.draw("Win")
+                if i.counter <= 1:
+                    i.counter = 290
+                    i.loc = (i.loc[0], 540)
+            for i in mainLoop.lossText:
+                i.draw("Loss")
+                if i.counter <= 1:
+                    i.counter = 290
+                    i.loc = (i.loc[0], 540)
+        CPUP.update()
+        # if mainLoop.deal == True:
         mainLoop.playerHandT.draw("Player: "+ str(sum(mainLoop.playerHand)))
         mainLoop.CPU1T.draw("CPU 1: "+ str(sum(mainLoop.CPU1Hand)))
         mainLoop.CPU2T.draw("CPU 2: "+ str(sum(mainLoop.CPU2Hand)))
         mainLoop.CPU3T.draw("CPU 3: "+ str(sum(mainLoop.CPU3Hand)))
+        mainLoop.CPU4T.draw("CPU 4: "+ str(sum(mainLoop.CPU4Hand)))
         if "3" in mainLoop.allstand and "1" in mainLoop.allstand and "2" in mainLoop.allstand and "5" in mainLoop.allstand:
             mainLoop.dealerT.draw("Dealer: "+ str(sum(mainLoop.dealerHand)))
         else:
             mainLoop.dealerT.draw("Dealer: "+ "~")
+                
+    for i in mainLoop.minBet:
+        i.draw("Minimum Buy In Of $10")
+
+    
             
     if mainLoop.startMenu == True:
         mainLoop.titleScreen.draw()
@@ -573,6 +599,9 @@ class mainloop(object):
         self.colourPlayer = black
         self.colourCPU1 = black
         self.colourCPU2 = black
+        self.colourCPU3 = black
+        self.colourCPU4 = black
+        
               
         self.bettingSys = betting()
         self.dealerP = dealerP()
@@ -599,9 +628,10 @@ class mainloop(object):
         global running
         redraw()
         self.playerHandT = drawText( self.colourPlayer, 30, (screenSize[0]/2 - 45, 900), False)
-        self.CPU1T = drawText( self.colourCPU1, 30, (screenSize[0]/8 - 45, 900), False)
+        self.CPU1T = drawText( self.colourCPU1, 30, (screenSize[0]*0.1 - 45, 900), False)
         self.CPU2T = drawText( self.colourCPU2, 30, (screenSize[0]*0.75 - 45, 900), False)
-        self.CPU3T = drawText( self.colourCPU2, 30, (screenSize[0]*0.4 - 45, 900), False)
+        self.CPU3T = drawText( self.colourCPU3, 30, (screenSize[0]*0.25 - 45, 900), False)
+        self.CPU4T = drawText( self.colourCPU4, 30, (screenSize[0]*0.9 - 45, 900), False)
         self.dealerT = drawText( self.colourDealer, 30, (screenSize[0]/2 - 45, 460), False)
         clock.tick(60)
         fps = str(int(clock. get_fps()))
@@ -642,12 +672,13 @@ class mainloop(object):
             self.colourPlayer = red
             self.colourCPU1 = black
             self.colourCPU2 = black
-        
-        if "1" in self.allstand and "2" in self.allstand and "3" in self.allstand:
+            self.colourCPU3 = black
+        if "1" in self.allstand and "2" in self.allstand and "3" in self.allstand and "4" in self.allstand:
             self.colourDealer = red
             self.colourPlayer = black
             self.colourCPU1 = black
             self.colourCPU2 = black
+            self.colourCPU3 = black
 
 
         if self.deal == True:
@@ -690,7 +721,7 @@ def reInit():
     CPUP = CPUPC()
     cardShuffle.shuffle()
     dealC.dealF()
-    dealHide = pygame.transform.scale(pygame.image.load(FlexyPath + "/Cards/Front/"+ list(cardShuffle.sCards)[8] + ".png").convert_alpha(), (150, 213))
+    dealHide = pygame.transform.scale(pygame.image.load(FlexyPath + "/Cards/Front/"+ list(cardShuffle.sCards)[10] + ".png").convert_alpha(), (150, 213))
 
 state = False
 mainLoop = mainloop()
