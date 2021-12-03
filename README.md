@@ -2,14 +2,14 @@
  
 ## Requirements
 - Python 3
-- Pygame 2.0.1
+- Pygame 2.1.0
 
 ## Controls
 |Function|Button|
 |--|--|
 |Hit|H|
 |Stand|S|
-|New Round|N|
+|New Round|N or use button|
 |Card Counting|P|
 
 (Please note card counting is only avalable when in a game and new round button only functions once a round is completed)
@@ -26,6 +26,8 @@
 
 ### Install pyInstaller:
 	pip install pyinstaller
+	
+### Navigate to Blackjack directory using cd
 
 ### Windows:
 
