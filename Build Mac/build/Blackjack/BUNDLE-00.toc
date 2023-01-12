@@ -1,3 +1,0 @@
-([('Blackjack',
-   '/Users/finn.jones/Documents/GitHub/Blackjack/dist/Blackjack',
-   'EXECUTABLE')],)
